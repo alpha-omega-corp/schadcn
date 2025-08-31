@@ -13,10 +13,10 @@ import {
   Settings2,
   SquareTerminal,
 } from "lucide-vue-next"
-import NavMain from '@/components/NavMain.vue'
-import NavProjects from '@/components/NavProjects.vue'
-import NavUser from '@/components/NavUser.vue'
-import TeamSwitcher from '@/components/TeamSwitcher.vue'
+import NavMain from '@/components/app/navigation/NavMain.vue'
+import NavProjects from '@/components/app/navigation/NavProjects.vue'
+import NavUser from '@/components/app/navigation/NavUser.vue'
+import TeamSwitcher from '@/components/app/navigation/TeamSwitcher.vue'
 
 import {
   Sidebar,
@@ -25,6 +25,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar'
+import {routeGroups} from "@/router/routes.ts";
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: "icon",
@@ -54,7 +55,7 @@ const data = {
       plan: "Free",
     },
   ],
-  navMain: [
+  routes: [
     {
       title: "Playground",
       url: "#",
@@ -167,7 +168,7 @@ const data = {
       <TeamSwitcher :teams="data.teams" />
     </SidebarHeader>
     <SidebarContent>
-      <NavMain :items="data.navMain" />
+      <NavMain :route-groups="routeGroups" />
       <NavProjects :projects="data.projects" />
     </SidebarContent>
     <SidebarFooter>
