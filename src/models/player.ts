@@ -2,7 +2,7 @@ interface Player {
     id: number
     firstName: string
     lastName: string
-    birthDay: Date
+    birthDate: Date
     height: number
     weight: number
     isActive: boolean
