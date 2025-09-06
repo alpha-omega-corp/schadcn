@@ -15,7 +15,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
-import type {RouteGroup} from "@/models/route.ts";
+import type {RouteGroup} from "@/models/app/router.ts";
 
 defineProps<{
   routeGroups: RouteGroup[]

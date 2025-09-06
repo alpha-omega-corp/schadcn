@@ -3,10 +3,10 @@ import {
     createWebHistory,
     type NavigationGuardNext,
     type RouteLocationNormalized,
-    type Router
+    type Router,
 } from "vue-router";
 import {routes} from "@/router/routes";
-import {type Route} from "@/models/route";
+import {type Route} from "@/models/app/router.ts";
 
 const router: Router = createRouter({
     history: createWebHistory(),

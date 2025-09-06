@@ -14,5 +14,5 @@ interface Route {
     service: string
 }
 
-export type { RouteGroup, Route }
+export type { RouteGroup, Route}
 

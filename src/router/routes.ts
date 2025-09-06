@@ -1,5 +1,5 @@
-import {type Route, type RouteGroup} from '@/models/route';
-import {KanbanIcon, UserCog} from "lucide-vue-next";
+import {type Route, type RouteGroup} from '@/models/app/router.ts';
+import {ActivityIcon, KanbanIcon, UserCogIcon} from "lucide-vue-next";
 
 const resolveComponent = (component: string, dir?: string) => {
     return (): Promise<unknown> => dir === undefined
@@ -28,7 +28,18 @@ export const routeGroups: RouteGroup[] = [
     },
     {
         name: "Players",
-        icon: UserCog,
+        icon: UserCogIcon,
+        routes: [
+            {
+                path: '/players',
+                component: resolveComponent('PlayersPage'),
+                service: 'guest',
+            },
+        ],
+    },
+    {
+        name: "Training",
+        icon: ActivityIcon,
         routes: [
             {
                 path: '/players',

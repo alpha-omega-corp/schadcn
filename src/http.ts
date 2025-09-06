@@ -13,8 +13,6 @@ const request = (options?: AxiosRequestConfig, headers?: object) => {
     });
 }
 
-
-
 function apiGet<T>(url: string, options?: AxiosRequestConfig): Promise<AxiosResponse<T, unknown>> {
     return request(options).get<T>(proxy(url))
 }
@@ -37,10 +35,6 @@ function apiPostFormData<T>(url: string, data: FormData, options?: AxiosRequestC
     }).post<T>(proxy(url), data)
 }
 
-function proxy(url: string): string {
-    return `${environment.VITE_PROXY}${url}`
-}
-
 const createFormData = (data: string): FormData => {
     const formData = new FormData();
     const blob = new Blob([data], {type: 'text/plain'});
@@ -49,6 +43,10 @@ const createFormData = (data: string): FormData => {
     formData.append('content', blob, url);
 
     return formData
+}
+
+function proxy(url: string): string {
+    return `${environment.VITE_PROXY}${url}`
 }
 
 export {
