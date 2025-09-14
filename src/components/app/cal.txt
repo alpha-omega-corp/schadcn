@@ -1,0 +1,11 @@
+<Calendar
+              v-model:placeholder="placeholder"
+              :max-value="today(getLocalTimeZone())"
+              :min-value="new CalendarDate(1900, 1, 1)"
+              :model-value="componentField.modelValue"
+              calendar-label="Date of birth"
+              initial-focus
+              @update:model-value="(v) => {
+                componentField['onUpdate:modelValue']?.(v)
+              }"
+          />
