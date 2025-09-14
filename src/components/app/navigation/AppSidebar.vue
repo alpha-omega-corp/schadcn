@@ -1,5 +1,6 @@
-<script setup lang="ts">
-import type { SidebarProps } from '@/components/ui/sidebar'
+<script lang="ts" setup>
+import type {SidebarProps} from '@/components/ui/sidebar'
+import {Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail,} from '@/components/ui/sidebar'
 
 import {
   AudioWaveform,
@@ -15,21 +16,17 @@ import {
 } from "lucide-vue-next"
 import NavMain from '@/components/app/navigation/NavMain.vue'
 import NavProjects from '@/components/app/navigation/NavProjects.vue'
-import NavUser from '@/components/app/navigation/NavUser.vue'
 import TeamSwitcher from '@/components/app/navigation/TeamSwitcher.vue'
-
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarRail,
-} from '@/components/ui/sidebar'
 import {routeGroups} from "@/router/routes.ts";
+import {useUserStore} from "@/stores/userStore";
+import NavUser from "@/components/app/navigation/NavUser.vue";
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: "icon",
 })
+
+const userStore = useUserStore()
+console.log()
 
 // This is sample data.
 const data = {
@@ -165,15 +162,15 @@ const data = {
 <template>
   <Sidebar v-bind="props">
     <SidebarHeader>
-      <TeamSwitcher :teams="data.teams" />
+      <TeamSwitcher :teams="data.teams"/>
     </SidebarHeader>
     <SidebarContent>
-      <NavMain :route-groups="routeGroups" />
-      <NavProjects :projects="data.projects" />
+      <NavMain :route-groups="routeGroups"/>
+      <NavProjects :projects="data.projects"/>
     </SidebarContent>
     <SidebarFooter>
-      <NavUser :user="data.user" />
+      <NavUser :user="userStore.getters.current"/>
     </SidebarFooter>
-    <SidebarRail />
+    <SidebarRail/>
   </Sidebar>
 </template>

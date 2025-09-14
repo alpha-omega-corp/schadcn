@@ -2,14 +2,10 @@ import type {Role} from "@/models/app/permission.ts";
 
 interface User {
     id: number;
+    token: string;
     email: string;
     name: string;
     roles: Role[];
 }
 
-interface UserState {
-    token: string | null
-    user: User | null
-}
-
-export type {User, UserState}
+export type {User}

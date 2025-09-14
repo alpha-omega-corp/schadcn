@@ -13,6 +13,8 @@ const router: Router = createRouter({
     routes,
 });
 
+console.log(routes)
+
 const setGuestPermissions = () => {
     sessionStorage.setItem('permissions', JSON.stringify({
         'guest.read': true,

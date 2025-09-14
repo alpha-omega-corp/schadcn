@@ -5,7 +5,6 @@ import {can} from "@/directives/can";
 import router from '@/router/index'
 import {userKey, userStore} from "@/stores/userStore.ts";
 
-
 createApp(App)
     .directive('can', can)
     .use(router)

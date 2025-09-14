@@ -1,52 +1,26 @@
-<script setup lang="ts">
-import AppSidebar from "@/components/app/navigation/AppSidebar.vue"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+<script lang="ts" setup>
+import {computed, defineAsyncComponent} from "vue";
+import {useRoute} from "vue-router";
+
+const route = useRoute();
+
+const layouts = {
+  GuestLayout: defineAsyncComponent(() => import("@/layouts/GuestLayout.vue")),
+  UserLayout: defineAsyncComponent(() => import("@/layouts/UserLayout.vue")),
+  AdminLayout: defineAsyncComponent(() => import("@/layouts/AdminLayout.vue")),
+} as const;
+
+type LayoutName = keyof typeof layouts;
+
+const layoutComponent = computed(() => {
+  const name = (route.meta?.layout as LayoutName) || "GuestLayout";
+  return layouts[name] ?? layouts.GuestLayout;
+});
 
 </script>
 
 <template>
-  <SidebarProvider>
-    <AppSidebar />
-    <SidebarInset>
-      <header class="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-        <div class="flex items-center gap-2 px-4">
-          <SidebarTrigger class="-ml-1" />
-          <Separator orientation="vertical" class="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem class="hidden md:block">
-                <BreadcrumbLink href="#">
-                  Building Your Application
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator class="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
-
-      <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min p-8">
-          <router-view />
-        </div>
-      </div>
-
-    </SidebarInset>
-  </SidebarProvider>
+  <component :is="layoutComponent">
+    <router-view/>
+  </component>
 </template>

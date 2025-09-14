@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {apiGet} from "@/http.ts";
+import {apiGet, apiPost} from "@/http.ts";
 import type {AxiosResponse} from "axios";
 import {computed, h, ref} from "vue"
 import type {Player} from "@/models/player.ts";
@@ -26,8 +26,15 @@ import {
   useVueTable,
 } from "@tanstack/vue-table"
 import {Checkbox} from "@/components/ui/checkbox"
-import PlayerAction from "@/views/PlayerAction.vue";
+import PlayerAction from "@/views/user/PlayerAction.vue";
 import {Button} from "@/components/ui/button";
+import DialogComponent from "@/components/app/DialogComponent.vue";
+import {toTypedSchema} from '@vee-validate/zod'
+import * as z from 'zod'
+import {Input} from "@/components/ui/input";
+import InputComponent from "@/components/app/InputComponent.vue";
+import CalendarComponent from "@/components/app/CalendarComponent.vue";
+
 
 const players = ref<Player[]>([])
 apiGet<{ items: Player[] }>(`/players`).then((res: AxiosResponse<{ items: Player[] }>) => {
@@ -172,6 +179,24 @@ const table = useVueTable({
   getFilteredRowModel: getFilteredRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
 })
+
+interface CreatePlayerRequest {
+  username: string;
+}
+
+const formSchema = toTypedSchema<CreatePlayerRequest>(z.object({
+  firstName: z.string().min(2).max(20),
+  lastName: z.string().min(2).max(20),
+  birthDate: z.string()
+}))
+
+const createPlayer = (data: CreatePlayerRequest) => {
+  console.log(data);
+  apiPost<Player>(`/players`, data).then((res: AxiosResponse<CreatePlayerRequest>) => {
+    console.log(res.data);
+  })
+}
+
 </script>
 
 <template>
@@ -179,13 +204,22 @@ const table = useVueTable({
 
     <div class="aspect-video rounded-xl bg-muted/50 p-4 border-1">
 
+      <DialogComponent :form="formSchema" label="Create" title="Create Player" @submit="createPlayer">
+        <InputComponent label="First Name" name="firstName"/>
+        <InputComponent label="Last Name" name="lastName"/>
+
+        <CalendarComponent label="Birth Date" name="birthDate"/>
+
+
+      </DialogComponent>
+
       <Button>
         <Mail class="w-4 h-4 mr-2"/>
         Login with Email
       </Button>
 
       <div class="flex items-center justify-between gap-4 mb-4">
-        <input
+        <Input
             v-model="globalFilter"
             class="border rounded px-3 py-2 text-sm w-full max-w-sm"
             placeholder="Search players..."

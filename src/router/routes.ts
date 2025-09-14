@@ -1,5 +1,5 @@
 import {type Route, type RouteGroup} from '@/models/app/router.ts';
-import {ActivityIcon, KanbanIcon, UserCogIcon} from "lucide-vue-next";
+import {ActivityIcon, HomeIcon, KanbanIcon, UserCogIcon} from "lucide-vue-next";
 
 const resolveComponent = (component: string, dir?: string) => {
     return (): Promise<unknown> => dir === undefined
@@ -7,7 +7,22 @@ const resolveComponent = (component: string, dir?: string) => {
         : import(`@/views/${dir}/${component}.vue`)
 }
 
+
 export const routeGroups: RouteGroup[] = [
+    {
+        name: "Welcome",
+        icon: HomeIcon,
+        routes: [
+            {
+                name: "Home",
+                path: "/",
+                component: resolveComponent("HomePage"),
+                meta: {layout: 'GuestLayout'},
+                service: 'guest'
+            },
+
+        ]
+    },
     {
         name: "Team",
         icon: KanbanIcon,
@@ -15,13 +30,14 @@ export const routeGroups: RouteGroup[] = [
             {
                 name: "Team Settings",
                 path: '/team/settings',
-                component: resolveComponent('TeamSettingsPage'),
+                component: resolveComponent('TeamSettingsPage', 'user'),
+                meta: {layout: 'UserLayout'},
                 service: 'guest',
             },
             {
                 name: "Team Layout",
                 path: '/team/layout',
-                component: resolveComponent('TeamLayoutPage'),
+                component: resolveComponent('TeamLayoutPage', 'user'),
                 service: 'guest',
             },
         ],
@@ -32,7 +48,8 @@ export const routeGroups: RouteGroup[] = [
         routes: [
             {
                 path: '/players',
-                component: resolveComponent('PlayersPage'),
+                component: resolveComponent('PlayersPage', 'user'),
+                meta: {layout: 'UserLayout'},
                 service: 'guest',
             },
         ],
@@ -43,13 +60,27 @@ export const routeGroups: RouteGroup[] = [
         routes: [
             {
                 path: '/players',
-                component: resolveComponent('PlayersPage'),
+                component: resolveComponent('PlayersPage', 'user'),
+                meta: {layout: 'UserLayout'},
                 service: 'guest',
             },
         ],
     },
 ]
 
-export const routes: Route[] = routeGroups.flatMap(rg => {
-    return rg.routes
-})
+const standaloneRoutes: Route[] = [
+    {
+        path: '/login',
+        component: resolveComponent('LoginPage'),
+        meta: {layout: 'GuestLayout'},
+        service: 'guest'
+    }
+]
+
+
+export const routes: Route[] = [
+    ...standaloneRoutes,
+    ...routeGroups.flatMap(rg => {
+        return rg.routes
+    })
+]

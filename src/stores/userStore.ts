@@ -1,26 +1,29 @@
 import {createStore, Store, useStore as baseUseStore} from 'vuex'
 import {apiGet} from "@/http";
-
 import type {InjectionKey} from 'vue'
 import type {AxiosResponse} from "axios";
-import type {UserState} from "@/models/app/user";
+import type {User} from "@/models/app/user";
+
+interface UserState {
+    user: User | null
+    permissions: object
+}
 
 export const userKey: InjectionKey<Store<UserState>> = Symbol()
 
 export const userStore: Store<UserState> = createStore<UserState>({
     state: {
-        token: sessionStorage.getItem('token'),
-        user: null,
+        user: JSON.parse(sessionStorage.getItem('user'))
     },
     mutations: {
-        login(state: UserState, res: UserState): void {
-            state.token = res.token
-            state.user = res.user
+        login(state: UserState, user: User): void {
+            state.user = user
+            console.log(user)
 
-            if (res.user) {
-                apiGet<{ matrix: object }>(`/users/${res.user.id}/permissions`)
-                    .then((permRes: AxiosResponse<{ matrix: object }>) => {
-                        createSession(res, permRes.data.matrix)
+            if (user) {
+                apiGet<{ matrix: object }>(`/user/${user.id}/permissions`)
+                    .then((res: AxiosResponse<{ matrix: object }>) => {
+                        createSession(user)
                     })
                     .catch((err) => {
                         console.log(err)
@@ -28,7 +31,7 @@ export const userStore: Store<UserState> = createStore<UserState>({
             }
         },
         logout(state: UserState): void {
-            deleteSession(state)
+            sessionStorage.clear()
         },
     },
     getters: {
@@ -38,25 +41,8 @@ export const userStore: Store<UserState> = createStore<UserState>({
     }
 })
 
-export const createSession = (state: UserState, permMatrix: object): void => {
-    if (state.token) {
-        let d: Date = new Date();
-        d.setTime((d.getTime() + 1) * 24 * 60 * 60 * 1000);
-        let expires: string = "expires=" + d.toUTCString();
-
-        document.cookie = "ALPHOMEGA=" + state.token + ";" + expires + ";path=/" + ";SameSite=None;Secure";
-        sessionStorage.setItem('user', JSON.stringify(state.user))
-        sessionStorage.setItem('permissions', JSON.stringify(permMatrix))
-        sessionStorage.setItem('token', state.token)
-    }
-}
-
-const deleteSession = (state: UserState): void => {
-    state.token = null
-    document.cookie = encodeURIComponent('JWT-TOKEN') +
-        "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" +
-        ";SameSite=None;secure"
-    sessionStorage.clear()
+export const createSession = (user: User): void => {
+    sessionStorage.setItem('user', JSON.stringify(user))
 }
 
 export function useUserStore(): Store<UserState> {
