@@ -18,8 +18,14 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/
 import {FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover"
 import {useVModel} from "@vueuse/core";
-import type {CalendarRootEmits, CalendarRootProps} from "reka-ui"
-import {CalendarRoot, useDateFormatter, useForwardPropsEmits} from "reka-ui"
+import {
+  CalendarRoot,
+  CalendarRootEmits,
+  CalendarRootProps,
+  DateValue,
+  useDateFormatter,
+  useForwardPropsEmits
+} from "reka-ui"
 import {createDecade, createYear, toDate} from "reka-ui/date"
 import {computed} from "vue"
 
@@ -27,7 +33,11 @@ const df = new DateFormatter("en-US", {
   dateStyle: "long",
 })
 
-const props = withDefaults(defineProps<CalendarRootProps & { class?: HTMLAttributes["class"] }>(), {
+const props = withDefaults(defineProps<CalendarRootProps & {
+  class?: HTMLAttributes["class"],
+  label: string,
+  name: string
+}>(), {
   modelValue: undefined,
   placeholder() {
     return today(getLocalTimeZone())
@@ -62,7 +72,7 @@ const formatter = useDateFormatter("en")
           <FormControl>
             <Button
                 :class="cn(
-                  'w-[240px] ps-3 text-start font-normal',
+                  'ps-3 text-start font-normal',
                   !componentField.modelValue && 'text-muted-foreground',
                 )" variant="outline"
             >
@@ -78,14 +88,16 @@ const formatter = useDateFormatter("en")
           <CalendarRoot
               v-slot="{ date, grid, weekDays }"
               v-model:placeholder="placeholder"
+              :calendar-label="label"
               :class="cn('rounded-md border p-3', props.class)"
               :max-value="today(getLocalTimeZone())"
               :min-value="new CalendarDate(1900, 1, 1)"
               :model-value="componentField.modelValue"
-              calendar-label="Date of birth"
               initial-focus
               v-bind="forwarded"
-              @update:model-value="(v) => {
+              @update:model-value="(v: DateValue | undefined) => {
+                const timestamp = v ? toDate(v).getTime() : undefined
+
                 componentField['onUpdate:modelValue']?.(v)
               }"
           >
@@ -94,12 +106,12 @@ const formatter = useDateFormatter("en")
                 <Select
                     :default-value="placeholder.month.toString()"
                     @update:model-value="(v) => {
-            if (!v || !placeholder) return;
-            if (Number(v) === placeholder?.month) return;
-            placeholder = placeholder.set({
-              month: Number(v),
-            })
-          }"
+                        if (!v || !placeholder) return;
+                        if (Number(v) === placeholder?.month) return;
+                        placeholder = placeholder.set({
+                          month: Number(v),
+                        })
+                    }"
                 >
                   <SelectTrigger aria-label="Select month" class="w-[60%]">
                     <SelectValue placeholder="Select month"/>
@@ -117,12 +129,12 @@ const formatter = useDateFormatter("en")
                 <Select
                     :default-value="placeholder.year.toString()"
                     @update:model-value="(v) => {
-            if (!v || !placeholder) return;
-            if (Number(v) === placeholder?.year) return;
-            placeholder = placeholder.set({
-              year: Number(v),
-            })
-          }"
+                      if (!v || !placeholder) return;
+                      if (Number(v) === placeholder?.year) return;
+                      placeholder = placeholder.set({
+                        year: Number(v),
+                      })
+                    }"
                 >
                   <SelectTrigger aria-label="Select year" class="w-[40%]">
                     <SelectValue placeholder="Select year"/>
