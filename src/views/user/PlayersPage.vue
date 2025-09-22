@@ -23,7 +23,7 @@ const playerSchema = toTypedSchema<CreatePlayerRequest>(z.object({
   firstName: z.string().min(2).max(20),
   lastName: z.string().min(2).max(20),
   // TODO: why the fuck
-  birthDate: z.preprocess((d: DateValue) => console.log(d.toDate().getTime()), z.number())
+  birthDate: z.preprocess((d?: DateValue) => d ? d.toDate().getTime() : 0, z.number())
 }))
 
 const createPlayer = (data: CreatePlayerRequest) => {

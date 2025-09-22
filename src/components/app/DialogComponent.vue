@@ -14,6 +14,7 @@ import {ActionEnum} from "@/enums/action";
 import {type FunctionalComponent, type HTMLAttributes, type VNodeProps} from "vue";
 import {BadgePlusIcon, PencilIcon, PlusIcon} from "lucide-vue-next";
 
+const emit = defineEmits(['submit'])
 const props = defineProps<{
   action: ActionEnum
   form?: TypedSchema<T>,
@@ -21,6 +22,7 @@ const props = defineProps<{
   title: string,
   description?: string,
 }>()
+
 
 const form = useForm({
   validationSchema: props.form,
