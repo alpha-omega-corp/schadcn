@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import type {Player} from "@/models/player.ts";
+import {Player} from "@/models/player.ts";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,13 +31,14 @@ function copy(player: Player) {
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
-      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-      <DropdownMenuItem @click="copy(player)">
-        Copy Player
-      </DropdownMenuItem>
+      <DropdownMenuLabel class="font-bold">Actions</DropdownMenuLabel>
       <DropdownMenuSeparator/>
-      <DropdownMenuItem>View customer</DropdownMenuItem>
-      <DropdownMenuItem>View payment details</DropdownMenuItem>
+      <DropdownMenuItem @click="update(player)">
+
+      </DropdownMenuItem>
+      <DropdownMenuItem @click="delete(player)">
+        Delete
+      </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
 </template>

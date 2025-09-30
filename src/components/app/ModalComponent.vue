@@ -16,13 +16,12 @@ import {BadgePlusIcon, PencilIcon, PlusIcon} from "lucide-vue-next";
 
 const emit = defineEmits(['submit'])
 const props = defineProps<{
-  action: ActionEnum
+  action: ActionEnum,
   form?: TypedSchema<T>,
   icon?: FunctionalComponent<HTMLAttributes & VNodeProps> | string
   title: string,
   description?: string,
 }>()
-
 
 const form = useForm({
   validationSchema: props.form,
@@ -46,8 +45,6 @@ function getIcon() {
       return props.icon
   }
 }
-
-
 </script>
 
 <template>

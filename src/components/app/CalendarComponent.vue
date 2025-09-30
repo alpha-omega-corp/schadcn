@@ -17,7 +17,6 @@ import {
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select"
 import {FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover"
-import {useVModel} from "@vueuse/core";
 import {
   CalendarRoot,
   CalendarRootEmits,
@@ -27,7 +26,7 @@ import {
   useForwardPropsEmits
 } from "reka-ui"
 import {createDecade, createYear, toDate} from "reka-ui/date"
-import {computed} from "vue"
+import {computed, ref, watch} from "vue"
 
 const df = new DateFormatter("en-US", {
   dateStyle: "long",
@@ -53,31 +52,43 @@ const delegatedProps = computed(() => {
   return delegated
 })
 
-const placeholder = useVModel(props, "modelValue", emits, {
-  passive: true,
-  defaultValue: today(getLocalTimeZone()),
-}) as Ref<DateValue>
+// Internal state to hold the DateValue for the calendar
+const internalDateValue = ref<DateValue | undefined>(undefined)
+
+const placeholder = ref<DateValue>(today(getLocalTimeZone()))
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits)
 
 const formatter = useDateFormatter("en")
+
+// Watch for changes to modelValue and convert to DateValue if needed
+watch(() => props.modelValue, (newValue) => {
+  if (newValue && typeof newValue === 'object' && 'calendar' in newValue) {
+    // Create a new reference to trigger reactivity
+    internalDateValue.value = new CalendarDate(newValue.year, newValue.month, newValue.day)
+    // Update placeholder to show the correct month/year
+    placeholder.value = new CalendarDate(newValue.year, newValue.month, newValue.day)
+  } else {
+    internalDateValue.value = undefined
+  }
+}, {immediate: true})
 </script>
 
 <template>
-  <FormField v-slot="{ componentField }" name="birthDate">
+  <FormField v-slot="{ componentField }" :name="name">
     <FormItem class="flex flex-col">
-      <FormLabel>Date of birth</FormLabel>
+      <FormLabel>{{ label }}</FormLabel>
       <Popover>
         <PopoverTrigger as-child>
           <FormControl>
             <Button
                 :class="cn(
                   'ps-3 text-start font-normal',
-                  !componentField.modelValue && 'text-muted-foreground',
+                  !internalDateValue && 'text-muted-foreground',
                 )" variant="outline"
             >
               <span>{{
-                  componentField.modelValue ? df.format(toDate(componentField.modelValue)) : "Pick a date"
+                  internalDateValue ? df.format(toDate(internalDateValue)) : "Pick a date"
                 }}</span>
               <CalendarIcon class="ms-auto h-4 w-4 opacity-50"/>
             </Button>
@@ -87,18 +98,17 @@ const formatter = useDateFormatter("en")
         <PopoverContent class="w-auto p-0">
           <CalendarRoot
               v-slot="{ date, grid, weekDays }"
+              v-model="internalDateValue"
               v-model:placeholder="placeholder"
               :calendar-label="label"
               :class="cn('rounded-md border p-3', props.class)"
               :max-value="today(getLocalTimeZone())"
               :min-value="new CalendarDate(1900, 1, 1)"
-              :model-value="componentField.modelValue"
               initial-focus
               v-bind="forwarded"
               @update:model-value="(v: DateValue | undefined) => {
                 const timestamp = v ? toDate(v).getTime() : undefined
-
-                componentField['onUpdate:modelValue']?.(v)
+                componentField['onUpdate:modelValue']?.(timestamp)
               }"
           >
             <CalendarHeader>

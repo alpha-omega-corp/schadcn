@@ -1,38 +1,25 @@
 <script lang="ts" setup>
 import {apiPost} from "@/http.ts";
 import type {AxiosResponse} from "axios";
-import type {Player} from "@/models/player.ts";
-import DialogComponent from "@/components/app/DialogComponent.vue";
-import {toTypedSchema} from '@vee-validate/zod'
-import * as z from 'zod'
+import {Player, PlayerSchema} from "@/models/player.ts";
 import InputComponent from "@/components/app/InputComponent.vue";
 import CalendarComponent from "@/components/app/CalendarComponent.vue";
-import {DateValue} from "reka-ui";
 import {ActionEnum} from "@/enums/action";
 import CardComponent from "@/components/app/CardComponent.vue";
 import PlayersTable from "@/views/user/PlayersTable.vue";
+import ModalComponent from "@/components/app/ModalComponent.vue";
+import {CalendarDate} from "@internationalized/date";
 
-interface CreatePlayerRequest {
-  lastName: string;
-  firstName: string;
-  birthDate: number;
-}
-
-
-const playerSchema = toTypedSchema<CreatePlayerRequest>(z.object({
-  firstName: z.string().min(2).max(20),
-  lastName: z.string().min(2).max(20),
-  // TODO: why the fuck
-  birthDate: z.preprocess((d?: DateValue) => d ? d.toDate().getTime() : 0, z.number())
-}))
-
-const createPlayer = (data: CreatePlayerRequest) => {
+const createPlayer = (data: Player) => {
   console.log(data);
-  apiPost<Player>(`/players`, data).then((res: AxiosResponse<CreatePlayerRequest>) => {
+  apiPost<Player>(`/players`, data).then((res: AxiosResponse<Player>) => {
     console.log(res.data);
   })
 }
 
+const updatePlayer = (data: Player) => {
+  console.log(data);
+}
 </script>
 
 <template>
@@ -41,22 +28,51 @@ const createPlayer = (data: CreatePlayerRequest) => {
         :description="$t('message.player_description')"
         :title="$t('message.player')"
     >
-
       <template v-slot:content>
-        <PlayersTable/>
+        <PlayersTable>
+          <template v-slot:actions="{player}">
+            <!-- Update -->
+            <ModalComponent
+                :action="ActionEnum.UPDATE"
+                :form="PlayerSchema"
+                :title="$t('player.update')"
+                @submit="updatePlayer"
+            >
+              <InputComponent
+                  :label="$t('player.first_name')"
+                  :model-value="player.firstName"
+                  name="firstName"
+              />
+
+              <InputComponent
+                  :label="$t('player.last_name')"
+                  :model-value="player.lastName"
+                  name="lastName"
+              />
+
+              <CalendarComponent
+                  :label="$t('player.birth_date')"
+                  :model-value="player.birthDate ? (() => { const d = new Date(player.birthDate); return new CalendarDate(d.getFullYear(), d.getMonth() + 1, d.getDate()); })() : undefined"
+                  name="birthDate"
+              />
+
+
+            </ModalComponent>
+          </template>
+        </PlayersTable>
       </template>
 
       <template v-slot:footer>
-        <DialogComponent
+        <ModalComponent
             :action="ActionEnum.CREATE"
-            :form="playerSchema"
+            :form="PlayerSchema"
             :title="$t('message.create_player')"
             @submit="createPlayer"
         >
           <InputComponent label="First Name" name="firstName"/>
           <InputComponent label="Last Name" name="lastName"/>
           <CalendarComponent label="Birth Date" name="birthDate"/>
-        </DialogComponent>
+        </ModalComponent>
       </template>
     </CardComponent>
   </div>

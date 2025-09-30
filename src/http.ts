@@ -1,5 +1,7 @@
 import axios, {type AxiosRequestConfig, type AxiosResponse} from "axios";
 import {environment} from "@/vite-env.d";
+import {parseStringToDateValue} from "reka-ui/date";
+import {DateValue} from "reka-ui";
 
 const request = (options?: AxiosRequestConfig, headers?: object) => {
     const auth = (sessionStorage.getItem('token') ? {Authorization: `Bearer ${sessionStorage.getItem('token')}`} : {})
@@ -49,12 +51,31 @@ function proxy(url: string): string {
     return `${environment.VITE_PROXY}${url}`
 }
 
+function timestampToDateValue(timestampMs: number, ref: DateValue): DateValue {
+    const d = new Date(timestampMs);
+
+    console.log(d)
+
+    const yyyy = d.getUTCFullYear();
+    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(d.getUTCDate()).padStart(2, "0");
+
+    const isoDate = `${yyyy}-${mm}-${dd}`; // "YYYY-MM-DD"
+    console.log(isoDate);
+    const dv = parseStringToDateValue(isoDate, ref)
+
+    console.log(dv)
+
+    return dv
+}
+
 export {
     apiGet,
     apiPost,
     apiPut,
     apiDelete,
     apiPostFormData,
-    createFormData
+    createFormData,
+    timestampToDateValue
 }
 

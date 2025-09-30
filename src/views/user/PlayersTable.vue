@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import {h, ref} from "vue";
+import {getCurrentInstance, h, ref} from "vue";
 import type {Player} from "@/models/player";
 import {apiGet} from "@/http";
 import type {AxiosResponse} from "axios";
@@ -8,12 +8,14 @@ import type {ColumnDef} from "@tanstack/vue-table";
 import {Checkbox} from "@/components/ui/checkbox";
 import PlayerAvatar from "@/views/user/PlayerAvatar.vue";
 import PlayerName from "@/views/user/PlayerName.vue";
-import PlayerAction from "@/views/user/PlayerAction.vue";
 import TableComponent from "@/components/app/TableComponent.vue";
 
+const instance = getCurrentInstance();
+defineSlots<{
+  actions: (slotProps: { player: Player }) => any
+}>();
 
 const players = ref<Player[]>([])
-
 apiGet<{ items: Player[] }>(`/players`).then((res: AxiosResponse<{ items: Player[] }>) => {
   players.value = res.data.items;
 })
@@ -77,19 +79,26 @@ const columns: ColumnDef<Player>[] = [
     enableSorting: true,
   },
   {
-    id: 'actions',
+    id: "actions",
+    header: "Actions",
     enableHiding: false,
     cell: ({row}) => {
-      const player = row.original
+      const player = row.original;
+      const slot = instance?.slots?.actions;
 
-      return h('div', {class: 'relative'}, h(PlayerAction, {
-        player,
-      }))
+      return h(
+          "div", {class: "relative"}, slot({player})
+      );
     },
   },
 ]
 </script>
 
 <template>
-  <TableComponent :columns="columns" :data="players" placeholder="Search players..." total-label="Total players"/>
+  <TableComponent
+      :columns="columns"
+      :data="players"
+      placeholder="Search players..."
+      total-label="Total players"
+  />
 </template>
