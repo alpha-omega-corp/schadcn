@@ -1,14 +1,24 @@
 <script lang="ts" setup>
-import {apiPost} from "@/http.ts";
+import {apiGet, apiPost} from "@/http.ts";
 import type {AxiosResponse} from "axios";
 import {Player, PlayerSchema} from "@/models/player.ts";
-import InputComponent from "@/components/app/InputComponent.vue";
-import CalendarComponent from "@/components/app/CalendarComponent.vue";
 import {ActionEnum} from "@/enums/action";
 import CardComponent from "@/components/app/CardComponent.vue";
 import PlayersTable from "@/views/user/PlayersTable.vue";
 import ModalComponent from "@/components/app/ModalComponent.vue";
-import {CalendarDate} from "@internationalized/date";
+import {DataSelect} from "@/models/app/data";
+import {ref} from "vue";
+import PlayerForm from "@/views/user/PlayerForm.vue";
+
+const positions = ref<DataSelect[]>([])
+const getPositions = () => {
+  apiGet<{ items: DataSelect[] }>(`/positions`).then((res: AxiosResponse<{ items: DataSelect[] }>) => {
+    positions.value = res.data.items
+    console.log(positions.value);
+  })
+}
+
+getPositions()
 
 const createPlayer = (data: Player) => {
   console.log(data);
@@ -18,6 +28,10 @@ const createPlayer = (data: Player) => {
 }
 
 const updatePlayer = (data: Player) => {
+  console.log(data);
+}
+
+const deletePlayer = (data: Player) => {
   console.log(data);
 }
 </script>
@@ -38,25 +52,16 @@ const updatePlayer = (data: Player) => {
                 :title="$t('player.update')"
                 @submit="updatePlayer"
             >
-              <InputComponent
-                  :label="$t('player.first_name')"
-                  :model-value="player.firstName"
-                  name="firstName"
-              />
+              <PlayerForm :data="player"/>
+            </ModalComponent>
 
-              <InputComponent
-                  :label="$t('player.last_name')"
-                  :model-value="player.lastName"
-                  name="lastName"
-              />
-
-              <CalendarComponent
-                  :label="$t('player.birth_date')"
-                  :model-value="player.birthDate ? (() => { const d = new Date(player.birthDate); return new CalendarDate(d.getFullYear(), d.getMonth() + 1, d.getDate()); })() : undefined"
-                  name="birthDate"
-              />
-
-
+            <!-- Delete -->
+            <ModalComponent
+                :action="ActionEnum.DELETE"
+                :title="$t('player.delete')"
+                @submit="deletePlayer"
+            >
+              {{ player.firstName }} {{ player.lastName }}
             </ModalComponent>
           </template>
         </PlayersTable>
@@ -69,9 +74,7 @@ const updatePlayer = (data: Player) => {
             :title="$t('message.create_player')"
             @submit="createPlayer"
         >
-          <InputComponent label="First Name" name="firstName"/>
-          <InputComponent label="Last Name" name="lastName"/>
-          <CalendarComponent label="Birth Date" name="birthDate"/>
+          <PlayerForm/>
         </ModalComponent>
       </template>
     </CardComponent>

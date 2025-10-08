@@ -1,7 +1,8 @@
 interface DataSelect {
-    id: string
-    name: string
-    items?: string[]
+    id: number;
+    name: string;
+    items?: DataSelect[];
 }
+
 
 export type {DataSelect}

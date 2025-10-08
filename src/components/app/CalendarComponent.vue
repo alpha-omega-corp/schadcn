@@ -35,13 +35,15 @@ const df = new DateFormatter("en-US", {
 const props = withDefaults(defineProps<CalendarRootProps & {
   class?: HTMLAttributes["class"],
   label: string,
-  name: string
+  name: string,
+  description?: string
 }>(), {
   modelValue: undefined,
   placeholder() {
     return today(getLocalTimeZone())
   },
   weekdayFormat: "short",
+
 })
 
 const emits = defineEmits<CalendarRootEmits>()
@@ -61,6 +63,23 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
 
 const formatter = useDateFormatter("en")
 
+// Ref to hidden input to trigger vee-validate updates programmatically
+const hiddenInputEl = ref<HTMLInputElement | null>(null)
+
+// helper to push current timestamp into the form field via input event (keeps pipeline intact)
+function syncFormFieldFromInternal() {
+  const el = hiddenInputEl.value
+  if (!el) return
+  const ts = internalDateValue.value ? toDate(internalDateValue.value).getTime() : undefined
+  // ensure number type by using type=number and valueAsNumber
+  if (typeof ts === 'number') {
+    el.valueAsNumber = ts
+  } else {
+    el.value = ''
+  }
+  el.dispatchEvent(new Event("input", { bubbles: true }))
+}
+
 // Watch for changes to modelValue and convert to DateValue if needed
 watch(() => props.modelValue, (newValue) => {
   if (newValue && typeof newValue === 'object' && 'calendar' in newValue) {
@@ -68,8 +87,16 @@ watch(() => props.modelValue, (newValue) => {
     internalDateValue.value = new CalendarDate(newValue.year, newValue.month, newValue.day)
     // Update placeholder to show the correct month/year
     placeholder.value = new CalendarDate(newValue.year, newValue.month, newValue.day)
+    // push into form field
+    syncFormFieldFromInternal()
+  } else if (typeof newValue === 'number') {
+    const d = new Date(newValue)
+    internalDateValue.value = new CalendarDate(d.getFullYear(), d.getMonth() + 1, d.getDate())
+    placeholder.value = new CalendarDate(d.getFullYear(), d.getMonth() + 1, d.getDate())
+    syncFormFieldFromInternal()
   } else {
     internalDateValue.value = undefined
+    syncFormFieldFromInternal()
   }
 }, {immediate: true})
 </script>
@@ -92,7 +119,7 @@ watch(() => props.modelValue, (newValue) => {
                 }}</span>
               <CalendarIcon class="ms-auto h-4 w-4 opacity-50"/>
             </Button>
-            <input hidden>
+            <input ref="hiddenInputEl" hidden type="number" v-bind="componentField" :value="internalDateValue ? toDate(internalDateValue).getTime() : ''">
           </FormControl>
         </PopoverTrigger>
         <PopoverContent class="w-auto p-0">
@@ -194,7 +221,7 @@ watch(() => props.modelValue, (newValue) => {
         </PopoverContent>
       </Popover>
       <FormDescription>
-        Your date of birth is used to calculate your age.
+        {{ description }}
       </FormDescription>
       <FormMessage/>
     </FormItem>

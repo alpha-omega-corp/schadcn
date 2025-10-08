@@ -12,7 +12,7 @@ import {Button} from "@/components/ui/button";
 import {TypedSchema, useForm} from "vee-validate";
 import {ActionEnum} from "@/enums/action";
 import {type FunctionalComponent, type HTMLAttributes, type VNodeProps} from "vue";
-import {BadgePlusIcon, PencilIcon, PlusIcon} from "lucide-vue-next";
+import {PencilIcon, PlusIcon, Trash2Icon} from "lucide-vue-next";
 
 const emit = defineEmits(['submit'])
 const props = defineProps<{
@@ -28,6 +28,7 @@ const form = useForm({
 })
 
 const onSubmit = form.handleSubmit((values) => {
+  console.log(values)
   emit('submit', values)
 })
 
@@ -40,7 +41,7 @@ function getIcon() {
     case ActionEnum.UPDATE:
       return PencilIcon
     case ActionEnum.DELETE:
-      return BadgePlusIcon
+      return Trash2Icon
     default:
       return props.icon
   }

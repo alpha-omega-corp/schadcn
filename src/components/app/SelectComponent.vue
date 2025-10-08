@@ -1,36 +1,77 @@
 <script lang="ts" setup>
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select"
 import {DataSelect} from "@/models/app/data";
+import {FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
+import {computed, ref, watch, nextTick} from "vue";
 
-defineProps<{
+const props = defineProps<{
   label: string,
+  name: string,
+  description?: string,
   data: DataSelect[],
+  modelValue?: number | string | undefined,
 }>()
+
+// Ensure Select receives a string for UI
+const normalizedModelValue = computed(() =>
+  props.modelValue === undefined || props.modelValue === null ? undefined : String(props.modelValue)
+)
+
+// String value for the hidden input (so z.coerce.number can parse it reliably)
+const stringModelValue = computed(() =>
+  props.modelValue === undefined || props.modelValue === null || props.modelValue === ''
+    ? ''
+    : String(Number(props.modelValue))
+)
+
+// Hidden input ref so we can trigger an input event when modelValue is pre-filled
+const hiddenInputEl = ref<HTMLInputElement | null>(null)
+
+function syncFormFieldFromModel() {
+  const el = hiddenInputEl.value
+  if (!el) return
+  el.value = stringModelValue.value as any
+  // Dispatch events so vee-validate updates its internal value when pre-filled
+  el.dispatchEvent(new Event('input', { bubbles: true }))
+  el.dispatchEvent(new Event('change', { bubbles: true }))
+}
+
+// When a pre-defined value arrives, initialize the form field value after mount to ensure registration
+watch(() => props.modelValue, async () => {
+  await nextTick()
+  syncFormFieldFromModel()
+}, { immediate: true })
 
 </script>
 
 <template>
-  <Select>
-    <SelectTrigger class="w-[180px]">
-      <SelectValue placeholder="Select a fruit"/>
-    </SelectTrigger>
-    <SelectContent>
-      <SelectGroup>
-        <SelectLabel>{{ label }}</SelectLabel>
-        <template v-for="item in data">
-          <SelectItem :value="item.id">
-            item.value
-          </SelectItem>
-        </template>
-      </SelectGroup>
-    </SelectContent>
-  </Select>
+
+  <FormField v-slot="{ componentField }" :name="name">
+    <FormItem class="flex-1">
+      <FormLabel>{{ label }}</FormLabel>
+
+      <Select
+        :model-value="normalizedModelValue"
+        @update:model-value="(v) => componentField['onUpdate:modelValue']?.(v === undefined ? undefined : Number(v))"
+      >
+        <FormControl>
+          <!-- Hidden input registers the field and initializes vee-validate when pre-filled -->
+          <input ref="hiddenInputEl" hidden type="text" v-bind="componentField" :value="stringModelValue">
+          <SelectTrigger class="w-full">
+            <SelectValue :placeholder="description"/>
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          <SelectGroup>
+            <template v-for="item in data" :key="item.id">
+              <SelectItem :value="String(item.id)">
+                {{ item.name }}
+              </SelectItem>
+            </template>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <FormMessage/>
+    </FormItem>
+  </FormField>
 </template>

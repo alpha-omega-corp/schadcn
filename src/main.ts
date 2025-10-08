@@ -11,17 +11,22 @@ const i18n = createI18n({
     legacy: false,
     locale: 'en',
     fallbackLocale: 'en',
+
     messages: {
         en: {
-            message: {
-                create_player: 'Create Player',
+            player: {
+                schema: {
+                    first_name: 'First Name',
+                    last_name: 'Last Name',
+                    birth_date: 'Birth Date',
+                    weight: 'Weight',
+                    height: 'Height',
+                    number: 'Number',
+                    gender: 'Gender',
+                    position: 'Position',
+                },
             },
         },
-        fr: {
-            message: {
-                create_player: 'Nouveau Joueur'
-            }
-        }
     }
 })
 
