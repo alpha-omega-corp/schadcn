@@ -12,11 +12,6 @@ const props = defineProps<{
   modelValue?: number | string | undefined,
 }>()
 
-// Ensure Select receives a string for UI
-const normalizedModelValue = computed(() =>
-  props.modelValue === undefined || props.modelValue === null ? undefined : String(props.modelValue)
-)
-
 // String value for the hidden input (so z.coerce.number can parse it reliably)
 const stringModelValue = computed(() =>
   props.modelValue === undefined || props.modelValue === null || props.modelValue === ''
@@ -30,6 +25,8 @@ const hiddenInputEl = ref<HTMLInputElement | null>(null)
 function syncFormFieldFromModel() {
   const el = hiddenInputEl.value
   if (!el) return
+  // Only sync when we actually have a pre-filled value
+  if (stringModelValue.value === '') return
   el.value = stringModelValue.value as any
   // Dispatch events so vee-validate updates its internal value when pre-filled
   el.dispatchEvent(new Event('input', { bubbles: true }))
@@ -51,12 +48,12 @@ watch(() => props.modelValue, async () => {
       <FormLabel>{{ label }}</FormLabel>
 
       <Select
-        :model-value="normalizedModelValue"
+        :model-value="componentField.modelValue === undefined || componentField.modelValue === null ? undefined : String(componentField.modelValue)"
         @update:model-value="(v) => componentField['onUpdate:modelValue']?.(v === undefined ? undefined : Number(v))"
       >
         <FormControl>
           <!-- Hidden input registers the field and initializes vee-validate when pre-filled -->
-          <input ref="hiddenInputEl" hidden type="text" v-bind="componentField" :value="stringModelValue">
+          <input ref="hiddenInputEl" hidden type="text" v-bind="componentField">
           <SelectTrigger class="w-full">
             <SelectValue :placeholder="description"/>
           </SelectTrigger>

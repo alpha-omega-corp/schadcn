@@ -9,7 +9,7 @@ interface Player {
     height: number
     weight: number
     isActive: boolean
-    avatar: string
+    avatar?: string
     birthDate: number
     positionId: number
     createdAt: number
@@ -17,6 +17,8 @@ interface Player {
 }
 
 export const PlayerSchema = toTypedSchema<Player>(z.object({
+    id: z.number().optional(),
+    avatar: z.any().optional(),
     firstName: z.string().min(2).max(20),
     lastName: z.string().min(2).max(20),
     birthDate: z.number(),

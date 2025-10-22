@@ -1,18 +1,18 @@
 <script lang="ts" setup>
-import {ref, watchEffect} from 'vue'
+import {ref} from 'vue'
+import type {ColumnDef, ColumnFiltersState, SortingState, VisibilityState,} from '@tanstack/vue-table'
 import {
-  ColumnDef,
-  ColumnFiltersState,
   FlexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
   useVueTable
 } from '@tanstack/vue-table'
-import {Input} from '@/components/ui/input'
 import {Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow,} from '@/components/ui/table'
+import {valueUpdater} from "@/lib/utils";
+import TablePagination from "@/components/app/table/TablePagination.vue";
+import TableToolbar from "@/components/app/table/TableToolbar.vue";
 
 type AnyRow = Record<string, any>
 
@@ -25,12 +25,18 @@ const props = defineProps<{
 
 const sorting = ref<SortingState>([])
 const columnFilters = ref<ColumnFiltersState>([])
+const columnVisibility = ref<VisibilityState>({})
+
 const globalFilter = ref<string>('')
 const rowSelection = ref<Record<string, boolean>>({})
 
 const table = useVueTable<AnyRow>({
-  data: props.data ?? [],
-  columns: props.columns ?? [],
+  get data() {
+    return props.data ?? []
+  },
+  get columns() {
+    return props.columns ?? []
+  },
   getCoreRowModel: getCoreRowModel(),
   getSortedRowModel: getSortedRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
@@ -48,7 +54,11 @@ const table = useVueTable<AnyRow>({
     get rowSelection() {
       return rowSelection.value
     },
+    get columnVisibility() {
+      return columnVisibility.value
+    },
   },
+  onColumnVisibilityChange: updaterOrValue => valueUpdater(updaterOrValue, columnVisibility),
   onSortingChange: updater => {
     sorting.value = typeof updater === "function" ? updater(sorting.value) : updater
   },
@@ -63,62 +73,20 @@ const table = useVueTable<AnyRow>({
   },
 })
 
-// keep table in sync when props change
-watchEffect(() => {
-  table.setOptions((prev) => ({
-    ...prev,
-    data: props.data ?? [],
-    columns: props.columns ?? [],
-  }))
-})
 </script>
 
 <template>
-  <div>
-    <div class="flex items-center justify-between gap-4 mb-4">
-      <Input
-          v-model="globalFilter"
-          :placeholder="placeholder || 'Search...'"
-          class="border rounded px-3 py-2 text-sm w-full max-w-sm"
-          type="text"
-      />
-      <div class="flex items-center gap-2">
-        <button
-            :disabled="!table.getCanPreviousPage()"
-            class="border rounded px-3 py-1 text-sm"
-            @click="table.previousPage()"
-        >
-          Prev
-        </button>
-        <span class="text-sm">
-          Page {{ table.getState().pagination.pageIndex + 1 }} of {{ table.getPageCount() }}
-        </span>
-        <button
-            :disabled="!table.getCanNextPage()"
-            class="border rounded px-3 py-1 text-sm"
-            @click="table.nextPage()"
-        >
-          Next
-        </button>
-      </div>
-    </div>
+  <div class="relative inline-block max-w-full overflow-auto">
+    <TableToolbar :table="table"/>
 
-    <Table class="w-full">
+    <Table>
       <TableHeader>
         <template v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
           <TableRow>
-            <template v-for="header in headerGroup.headers" :key="header.id">
-              <TableHead
-                  class="cursor-pointer select-none"
-                  @click="header.column.getToggleSortingHandler()?.($event)"
-              >
-                <FlexRender
-                    v-if="!header.isPlaceholder"
-                    :props="header.getContext()"
-                    :render="header.column.columnDef.header"
-                />
-              </TableHead>
-            </template>
+            <TableHead v-for="header in headerGroup.headers" :key="header.id">
+              <FlexRender v-if="!header.isPlaceholder" :props="header.getContext()"
+                          :render="header.column.columnDef.header"/>
+            </TableHead>
           </TableRow>
         </template>
       </TableHeader>
@@ -140,13 +108,15 @@ watchEffect(() => {
         </template>
       </TableBody>
 
-      <TableFooter>
+      <TableFooter class="border-t border-t-teal-900">
         <TableRow>
-          <TableCell :colspan="columns.length" class="text-right text-sm">
-            {{ totalLabel || 'Total items' }}: {{ data.length }}
+          <TableCell :colspan="columns.length">
+            <TablePagination :table="table"/>
           </TableCell>
         </TableRow>
+
       </TableFooter>
     </Table>
   </div>
+
 </template>

@@ -14,6 +14,7 @@ import {
 import type {RouteGroup} from "@/models/app/router.ts";
 
 defineProps<{
+  title: string,
   routeGroups: RouteGroup[]
 }>()
 
@@ -21,7 +22,7 @@ defineProps<{
 
 <template>
   <SidebarGroup>
-    <SidebarGroupLabel>Coach Platform</SidebarGroupLabel>
+    <SidebarGroupLabel>{{ title }}</SidebarGroupLabel>
     <SidebarMenu>
 
       <SidebarMenuItem

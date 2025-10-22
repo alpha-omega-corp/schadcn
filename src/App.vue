@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {computed, defineAsyncComponent} from "vue";
 import {useRoute} from "vue-router";
+import {Toaster} from "@/components/ui/toast";
 
 const route = useRoute();
 
@@ -20,6 +21,9 @@ const layoutComponent = computed(() => {
 </script>
 
 <template>
+
+  <Toaster/>
+
   <component :is="layoutComponent">
     <router-view/>
   </component>

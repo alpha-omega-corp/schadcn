@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/number-field";
 
 defineProps<{
-  label: string,
+  label?: string,
   type?: string,
   description?: string,
   name: string,

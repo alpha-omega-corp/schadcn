@@ -5,6 +5,7 @@ import {can} from "@/directives/can";
 import router from '@/router/index'
 import {userKey, userStore} from "@/stores/userStore.ts";
 import {createI18n} from "vue-i18n";
+import {notificationKey, notificationStore} from "@/stores/notificationStore";
 
 
 const i18n = createI18n({
@@ -14,7 +15,15 @@ const i18n = createI18n({
 
     messages: {
         en: {
+            action: {
+                delete: 'Deleted {0}',
+            },
             player: {
+                value: 'Player',
+                table: {
+                    title: 'Players Table',
+                    description: "Manage players in the team"
+                },
                 schema: {
                     first_name: 'First Name',
                     last_name: 'Last Name',
@@ -24,7 +33,9 @@ const i18n = createI18n({
                     number: 'Number',
                     gender: 'Gender',
                     position: 'Position',
+                    avatar: 'Avatar',
                 },
+
             },
         },
     }
@@ -35,5 +46,6 @@ createApp(App)
     .directive('can', can)
     .use(router)
     .use(userStore, userKey)
+    .use(notificationStore, notificationKey)
     .use(i18n)
     .mount('#app')

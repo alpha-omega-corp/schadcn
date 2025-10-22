@@ -1,55 +1,99 @@
 <script lang="ts" setup>
-import {apiGet, apiPost} from "@/http.ts";
+import {apiDelete, apiGet, apiPost, apiPut, image} from "@/http.ts";
 import type {AxiosResponse} from "axios";
 import {Player, PlayerSchema} from "@/models/player.ts";
 import {ActionEnum} from "@/enums/action";
 import CardComponent from "@/components/app/CardComponent.vue";
 import PlayersTable from "@/views/user/PlayersTable.vue";
 import ModalComponent from "@/components/app/ModalComponent.vue";
-import {DataSelect} from "@/models/app/data";
-import {ref} from "vue";
 import PlayerForm from "@/views/user/PlayerForm.vue";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {useNotificationStore} from "@/stores/notificationStore";
+import {NotificationType} from "@/enums/notification";
+import {useI18n} from "vue-i18n";
+import {ref} from "vue";
+import {Badge} from "@/components/ui/badge";
 
-const positions = ref<DataSelect[]>([])
-const getPositions = () => {
-  apiGet<{ items: DataSelect[] }>(`/positions`).then((res: AxiosResponse<{ items: DataSelect[] }>) => {
-    positions.value = res.data.items
-    console.log(positions.value);
+const players = ref<Player[]>([])
+const notifications = useNotificationStore()
+const i18n = useI18n();
+
+function getPlayers() {
+  apiGet<{ items: Player[] }>(`/players`).then((res: AxiosResponse<{ items: Player[] }>) => {
+    players.value = res.data.items;
   })
 }
 
-getPositions()
-
 const createPlayer = (data: Player) => {
-  console.log(data);
-  apiPost<Player>(`/players`, data).then((res: AxiosResponse<Player>) => {
+  apiPost<Player>(`/player`, data, true).then((res: AxiosResponse<Player>) => {
     console.log(res.data);
   })
 }
 
 const updatePlayer = (data: Player) => {
-  console.log(data);
+  apiPut<Player>(`/player/${data.id}`, data, true).then((res: AxiosResponse<Player>) => {
+    notifications.dispatch(NotificationType.SUCCESS, {
+      description: i18n.t('action.update', [`${data.firstName} ${data.lastName}`])
+    })
+
+    getPlayers()
+  }).catch((err: any) => {
+    notifications.dispatch(NotificationType.ERROR, {
+      description: err
+    })
+  })
 }
 
 const deletePlayer = (data: Player) => {
-  console.log(data);
+  apiDelete(`player/${data.id}`).then(() => {
+    notifications.dispatch(NotificationType.SUCCESS, {
+      description: i18n.t('action.delete', [`${data.firstName} ${data.lastName}`])
+    })
+
+    getPlayers()
+  }).catch((err: any) => {
+    notifications.dispatch(NotificationType.ERROR, {
+      description: err
+    })
+  })
 }
+
+getPlayers()
+
 </script>
 
 <template>
-  <div class="grid auto-rows-min gap-4 md:grid-cols-2">
-    <CardComponent
-        :description="$t('message.player_description')"
-        :title="$t('message.player')"
-    >
-      <template v-slot:content>
-        <PlayersTable>
-          <template v-slot:actions="{player}">
-            <!-- Update -->
+  <CardComponent
+      :description="$t('player.table.description')"
+      :title="$t('player.table.title')"
+  >
+    <template v-slot:content>
+      <PlayersTable :data="players">
+
+        <template v-slot:number="{player}">
+          <Badge>{{ player.number }}</Badge>
+        </template>
+
+        <template v-slot:name="{player}">
+          {{ player.firstName }} {{ player.lastName }}
+        </template>
+
+        <template v-slot:avatar="{player}">
+          <Avatar>
+            <AvatarImage :alt="player.name" :src="image(player.avatar)"/>
+            <AvatarFallback class="rounded-lg">
+              <img :src="`https://robohash.org/${player.firstName}`" alt="">
+            </AvatarFallback>
+          </Avatar>
+        </template>
+
+        <template v-slot:actions="{player}">
+          <!-- Update -->
+          <div class="flex gap-2">
             <ModalComponent
                 :action="ActionEnum.UPDATE"
                 :form="PlayerSchema"
-                :title="$t('player.update')"
+                :title="$t('player.value')"
                 @submit="updatePlayer"
             >
               <PlayerForm :data="player"/>
@@ -58,25 +102,27 @@ const deletePlayer = (data: Player) => {
             <!-- Delete -->
             <ModalComponent
                 :action="ActionEnum.DELETE"
-                :title="$t('player.delete')"
+                :payload="player"
+                :title="$t('player.value')"
                 @submit="deletePlayer"
             >
               {{ player.firstName }} {{ player.lastName }}
             </ModalComponent>
-          </template>
-        </PlayersTable>
-      </template>
+          </div>
+        </template>
+      </PlayersTable>
+    </template>
 
-      <template v-slot:footer>
-        <ModalComponent
-            :action="ActionEnum.CREATE"
-            :form="PlayerSchema"
-            :title="$t('message.create_player')"
-            @submit="createPlayer"
-        >
-          <PlayerForm/>
-        </ModalComponent>
-      </template>
-    </CardComponent>
-  </div>
+    <template v-slot:footer>
+      <!-- Create -->
+      <ModalComponent
+          :action="ActionEnum.CREATE"
+          :form="PlayerSchema"
+          :title="$t('player.value')"
+          @submit="createPlayer"
+      >
+        <PlayerForm/>
+      </ModalComponent>
+    </template>
+  </CardComponent>
 </template>

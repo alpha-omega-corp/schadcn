@@ -1,7 +1,5 @@
 import axios, {type AxiosRequestConfig, type AxiosResponse} from "axios";
 import {environment} from "@/vite-env.d";
-import {parseStringToDateValue} from "reka-ui/date";
-import {DateValue} from "reka-ui";
 
 const request = (options?: AxiosRequestConfig, headers?: object) => {
     const auth = (sessionStorage.getItem('token') ? {Authorization: `Bearer ${sessionStorage.getItem('token')}`} : {})
@@ -19,11 +17,17 @@ function apiGet<T>(url: string, options?: AxiosRequestConfig): Promise<AxiosResp
     return request(options).get<T>(proxy(url))
 }
 
-function apiPost<T>(url: string, data: object, options?: AxiosRequestConfig<T>): Promise<AxiosResponse<T, unknown>> {
+function apiPost<T>(url: string, data: object, multipart: boolean = false, options?: AxiosRequestConfig<T>): Promise<AxiosResponse<T, unknown>> {
+    if (multipart) {
+        data = createFormData(data)
+    }
     return request(options).post<T>(proxy(url), data)
 }
 
-function apiPut<T>(url: string, data: object, options?: AxiosRequestConfig<T>): Promise<AxiosResponse<T, unknown>> {
+function apiPut<T>(url: string, data: object, multipart: boolean = false, options?: AxiosRequestConfig<T>): Promise<AxiosResponse<T, unknown>> {
+    if (multipart) {
+        data = createFormData(data)
+    }
     return request(options).put<T>(proxy(url), data)
 }
 
@@ -31,18 +35,61 @@ function apiDelete<T>(url: string, options?: AxiosRequestConfig<T>): Promise<Axi
     return request(options).delete<T>(proxy(url), options)
 }
 
-function apiPostFormData<T>(url: string, data: FormData, options?: AxiosRequestConfig<T>): Promise<AxiosResponse<T, unknown>> {
-    return request(options, {
-        'Content-Type': 'multipart/form-data',
-    }).post<T>(proxy(url), data)
-}
-
-const createFormData = (data: string): FormData => {
+const createFormData = (data: any): FormData => {
     const formData = new FormData();
-    const blob = new Blob([data], {type: 'text/plain'});
-    const url = URL.createObjectURL(blob)
 
-    formData.append('content', blob, url);
+    if (!data || typeof data !== 'object') {
+        return formData
+    }
+
+    const appendValue = (key: string, value: any) => {
+        if (value === undefined || value === null) return
+
+        // File or Blob
+        if (value instanceof File || value instanceof Blob) {
+            const filename = (value as File).name || `${key}.bin`
+            formData.append(key, value, filename)
+            return
+        }
+
+
+        // Primitive types
+        const type = typeof value
+        if (type === 'string' || type === 'number' || type === 'boolean') {
+            formData.append(key, String(value))
+            return
+        }
+
+        // Arrays
+        if (Array.isArray(value)) {
+            // If array of primitives or files, append multiple key[]
+            for (const item of value) {
+                if (item === undefined || item === null) continue
+                if (item instanceof File || item instanceof Blob) {
+                    const filename = (item as File).name || `${key}.bin`
+                    formData.append(`${key}[]`, item, filename)
+                } else if (['string', 'number', 'boolean'].includes(typeof item)) {
+                    formData.append(`${key}[]`, String(item))
+                } else {
+                    // For objects in arrays, stringify the whole array once and stop
+                    formData.append(key, JSON.stringify(value))
+                    break
+                }
+            }
+            return
+        }
+
+        // Fallback for objects: JSON stringify
+        try {
+            formData.append(key, JSON.stringify(value))
+        } catch {
+            formData.append(key, String(value))
+        }
+    }
+
+    for (const [key, value] of Object.entries(data)) {
+        appendValue(key, value)
+    }
 
     return formData
 }
@@ -51,31 +98,18 @@ function proxy(url: string): string {
     return `${environment.VITE_PROXY}${url}`
 }
 
-function timestampToDateValue(timestampMs: number, ref: DateValue): DateValue {
-    const d = new Date(timestampMs);
-
-    console.log(d)
-
-    const yyyy = d.getUTCFullYear();
-    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-    const dd = String(d.getUTCDate()).padStart(2, "0");
-
-    const isoDate = `${yyyy}-${mm}-${dd}`; // "YYYY-MM-DD"
-    console.log(isoDate);
-    const dv = parseStringToDateValue(isoDate, ref)
-
-    console.log(dv)
-
-    return dv
+function image(path?: string): string {
+    if (!path) return ''
+    return `${environment.VITE_API}/${path}`
 }
+
 
 export {
     apiGet,
     apiPost,
     apiPut,
     apiDelete,
-    apiPostFormData,
     createFormData,
-    timestampToDateValue
+    image
 }
 

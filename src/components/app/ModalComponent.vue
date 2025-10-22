@@ -11,8 +11,12 @@ import {
 import {Button} from "@/components/ui/button";
 import {TypedSchema, useForm} from "vee-validate";
 import {ActionEnum} from "@/enums/action";
-import {type FunctionalComponent, type HTMLAttributes, type VNodeProps} from "vue";
+import {type FunctionalComponent, type HTMLAttributes, ref, type VNodeProps} from "vue";
 import {PencilIcon, PlusIcon, Trash2Icon} from "lucide-vue-next";
+import {cn} from "@/lib/utils";
+
+const variant = ref()
+const open = ref(false)
 
 const emit = defineEmits(['submit'])
 const props = defineProps<{
@@ -21,6 +25,7 @@ const props = defineProps<{
   icon?: FunctionalComponent<HTMLAttributes & VNodeProps> | string
   title: string,
   description?: string,
+  payload?: unknown,
 }>()
 
 const form = useForm({
@@ -28,19 +33,24 @@ const form = useForm({
 })
 
 const onSubmit = form.handleSubmit((values) => {
-  console.log(values)
+  open.value = false
   emit('submit', values)
 })
 
-const variant = props.action === ActionEnum.CREATE ? 'primary' : 'destructive'
+function confirm() {
+  open.value = false
+  emit('submit', props.payload)
+}
 
 function getIcon() {
   switch (props.action) {
     case ActionEnum.CREATE:
       return PlusIcon
     case ActionEnum.UPDATE:
+      variant.value = 'outline'
       return PencilIcon
     case ActionEnum.DELETE:
+      variant.value = 'outline'
       return Trash2Icon
     default:
       return props.icon
@@ -49,24 +59,33 @@ function getIcon() {
 </script>
 
 <template>
-  <Dialog>
+  <Dialog v-model:open="open">
     <DialogTrigger as-child>
-      <Button class="dialog-btn" variant="default">
-        <component :is="getIcon()" class="size-4"/>
-        <span>{{ action }}</span>
+      <Button :variant="variant" class="dialog-btn">
+        <component :is="getIcon()" :class="cn('size-4', action === ActionEnum.DELETE && 'text-destructive')"/>
+        <span v-if="action !== ActionEnum.DELETE">{{ action }}</span>
       </Button>
     </DialogTrigger>
 
-
     <DialogContent @open-auto-focus="(e) => e.preventDefault()">
       <DialogHeader>
-        <DialogTitle>{{ title }}</DialogTitle>
+        <DialogTitle class="flex gap-1">
+          <span class="capitalize">{{ action }}</span>
+          <span>{{ title }}</span>
+        </DialogTitle>
         <DialogDescription>
           {{ description }}
         </DialogDescription>
       </DialogHeader>
 
-      <form v-if="form" @submit="onSubmit">
+      <div v-if="payload">
+        <slot></slot>
+        <DialogFooter>
+          <Button variant="destructive" @click="confirm">Delete</Button>
+        </DialogFooter>
+      </div>
+
+      <form v-else @submit="onSubmit">
         <slot></slot>
 
         <DialogFooter>
@@ -76,9 +95,7 @@ function getIcon() {
         </DialogFooter>
       </form>
 
-      <div v-else>
-        Cunt
-      </div>
+
     </DialogContent>
   </Dialog>
 </template>

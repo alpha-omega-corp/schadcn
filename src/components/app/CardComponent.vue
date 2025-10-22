@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-  <Card>
+  <Card class="w-fit">
     <CardHeader>
       <CardTitle>{{ title }}</CardTitle>
       <CardDescription>{{ description }}</CardDescription>

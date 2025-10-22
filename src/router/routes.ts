@@ -1,5 +1,5 @@
 import {type Route, type RouteGroup} from '@/models/app/router.ts';
-import {ActivityIcon, Columns3Icon, HomeIcon, KanbanIcon, UserCogIcon} from "lucide-vue-next";
+import {HomeIcon, UserCogIcon} from "lucide-vue-next";
 
 const resolveComponent = (component: string, dir?: string) => {
     return (): Promise<unknown> => dir === undefined
@@ -7,14 +7,12 @@ const resolveComponent = (component: string, dir?: string) => {
         : import(`@/views/${dir}/${component}.vue`)
 }
 
-
-export const routeGroups: RouteGroup[] = [
+export const guestRoutes: Route[] = [
     {
-        name: "Welcome",
+        name: "Home",
         icon: HomeIcon,
         routes: [
             {
-                name: "Home",
                 path: "/",
                 component: resolveComponent("HomePage"),
                 meta: {layout: 'GuestLayout'},
@@ -23,25 +21,10 @@ export const routeGroups: RouteGroup[] = [
 
         ]
     },
-    {
-        name: "Team",
-        icon: KanbanIcon,
-        routes: [
-            {
-                name: "Team Settings",
-                path: '/team/settings',
-                component: resolveComponent('TeamSettingsPage', 'user'),
-                meta: {layout: 'UserLayout'},
-                service: 'guest',
-            },
-            {
-                name: "Team Layout",
-                path: '/team/layout',
-                component: resolveComponent('TeamLayoutPage', 'user'),
-                service: 'guest',
-            },
-        ],
-    },
+]
+
+
+export const userRoutes: RouteGroup[] = [
     {
         name: "Players",
         icon: UserCogIcon,
@@ -55,24 +38,51 @@ export const routeGroups: RouteGroup[] = [
         ],
     },
     {
-        name: "Layout",
-        icon: Columns3Icon,
+        name: "Layouts",
+        icon: UserCogIcon,
         routes: [
             {
-                path: '/layout',
-                component: resolveComponent('LayoutPage', 'user'),
+                path: '/layouts',
+                component: resolveComponent('LayoutsPage', 'user'),
                 meta: {layout: 'UserLayout'},
                 service: 'guest',
             },
         ],
     },
     {
-        name: "Training",
-        icon: ActivityIcon,
+        name: "Settings",
+        icon: UserCogIcon,
         routes: [
             {
-                path: '/players',
-                component: resolveComponent('PlayersPage', 'user'),
+                path: '/settings',
+                component: resolveComponent('SettingsPage', 'user'),
+                meta: {layout: 'UserLayout'},
+                service: 'guest',
+            },
+        ],
+    },
+]
+
+export const managementRoutes: Route[] = [
+    {
+        name: "Game Scheduling",
+        icon: UserCogIcon,
+        routes: [
+            {
+                path: '/games',
+                component: resolveComponent('GamesPage', 'user'),
+                meta: {layout: 'UserLayout'},
+                service: 'guest',
+            },
+        ],
+    },
+    {
+        name: "Training Milestones",
+        icon: UserCogIcon,
+        routes: [
+            {
+                path: '/games',
+                component: resolveComponent('GamesPage', 'user'),
                 meta: {layout: 'UserLayout'},
                 service: 'guest',
             },
@@ -92,7 +102,13 @@ const standaloneRoutes: Route[] = [
 
 export const routes: Route[] = [
     ...standaloneRoutes,
-    ...routeGroups.flatMap(rg => {
+    ...userRoutes.flatMap(rg => {
+        return rg.routes
+    }),
+    ...managementRoutes.flatMap(rg => {
+        return rg.routes
+    }),
+    ...guestRoutes.flatMap(rg => {
         return rg.routes
     })
 ]

@@ -14,10 +14,9 @@ import {
   Settings2,
   SquareTerminal,
 } from "lucide-vue-next"
-import NavMain from '@/components/app/navigation/NavMain.vue'
-import NavProjects from '@/components/app/navigation/NavProjects.vue'
+import NavGroup from '@/components/app/navigation/NavGroup.vue'
 import TeamSwitcher from '@/components/app/navigation/TeamSwitcher.vue'
-import {routeGroups} from "@/router/routes.ts";
+import {managementRoutes, userRoutes} from "@/router/routes.ts";
 import {useUserStore} from "@/stores/userStore";
 import NavUser from "@/components/app/navigation/NavUser.vue";
 
@@ -165,8 +164,8 @@ const data = {
       <TeamSwitcher :teams="data.teams"/>
     </SidebarHeader>
     <SidebarContent>
-      <NavMain :route-groups="routeGroups"/>
-      <NavProjects :projects="data.projects"/>
+      <NavGroup :route-groups="userRoutes" title="Team"/>
+      <NavGroup :route-groups="managementRoutes" title="Management"/>
     </SidebarContent>
     <SidebarFooter>
       <NavUser :user="userStore.getters.current"/>

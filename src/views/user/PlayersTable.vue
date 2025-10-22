@@ -1,93 +1,85 @@
 <script lang="ts" setup>
 
-import {getCurrentInstance, h, ref} from "vue";
+import {getCurrentInstance, h} from "vue";
 import type {Player} from "@/models/player";
-import {apiGet} from "@/http";
-import type {AxiosResponse} from "axios";
 import type {ColumnDef} from "@tanstack/vue-table";
-import {Checkbox} from "@/components/ui/checkbox";
-import PlayerAvatar from "@/views/user/PlayerAvatar.vue";
-import PlayerName from "@/views/user/PlayerName.vue";
-import TableComponent from "@/components/app/TableComponent.vue";
+import TableComponent from "@/components/app/table/TableComponent.vue";
+import TableHeader from "@/components/app/table/TableHeader.vue";
+
 
 const instance = getCurrentInstance();
 defineSlots<{
-  actions: (slotProps: { player: Player }) => any
+  avatar: (slotProps: { player: Player }) => any,
+  actions: (slotProps: { player: Player }) => any,
+  number: (slotProps: { player: Player }) => any,
+  name: (slotProps: { player: Player }) => any,
 }>();
 
-const players = ref<Player[]>([])
-apiGet<{ items: Player[] }>(`/players`).then((res: AxiosResponse<{ items: Player[] }>) => {
-  players.value = res.data.items;
-})
+defineProps<{
+  data: Player[],
+}>()
 
 const columns: ColumnDef<Player>[] = [
-  {
-    id: "select",
-    header: ({table}) =>
-        h(Checkbox, {
-          modelValue:
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate"),
-          "onUpdate:modelValue": (value: boolean) =>
-              table.toggleAllPageRowsSelected(value),
-          ariaLabel: "Select all",
-        }),
-    cell: ({row}) =>
-        h(Checkbox, {
-          modelValue: row.getIsSelected(),
-          "onUpdate:modelValue": (value: boolean) => row.toggleSelected(value),
-          ariaLabel: "Select row",
-        }),
-    enableSorting: false,
-    enableHiding: false,
-    size: 32,
-  },
   {
     header: "Avatar",
     accessorKey: "avatar",
     cell: ({row}) => {
       const player = row.original
+      const slot = instance?.slots?.avatar;
 
-      return h('div', {class: 'relative'}, h(PlayerAvatar, {
-        player,
-      }))
+      return h(
+          "div", {class: ""}, slot({player})
+      );
     },
-    enableSorting: false,
   },
   {
-    header: "Name",
-    accessorKey: "name",
+    accessorKey: "number",
+    header: ({column}) => h(TableHeader, {column, title: 'Number', class: 'text-center'}),
     cell: ({row}) => {
       const player = row.original
+      const slot = instance?.slots?.number;
 
-      return h('div', {class: 'relative'}, h(PlayerName, {
-        player,
-      }))
+      return h(
+          "div", {class: "flex justify-center me-4"}, slot({player})
+      );
     },
-    enableSorting: false,
   },
   {
-    header: "Height",
+    id: "Name",
+    header: ({column}) => h(TableHeader, {column, title: 'Name'}),
+    accessorFn: (row) => `${row.firstName} ${row.lastName}`,
+    cell: ({row}) => {
+      const player = row.original
+      const slot = instance?.slots?.name;
+
+      return h(
+          "div", {class: "relative"}, slot({player})
+      );
+    },
+  },
+  {
+    header: ({column}) => h(TableHeader, {column, title: 'Height'}),
     accessorKey: "height",
     cell: info => String(info.getValue()),
-    enableSorting: true,
+    enableGlobalFilter: false
   },
   {
-    header: "Weight",
+    header: ({column}) => h(TableHeader, {column, title: 'Weight'}),
     accessorKey: "weight",
     cell: info => String(info.getValue()),
     enableSorting: true,
+    enableGlobalFilter: false
   },
   {
     id: "actions",
-    header: "Actions",
+    header: () => h('div', {class: ''}, 'Actions'),
     enableHiding: false,
     cell: ({row}) => {
       const player = row.original;
       const slot = instance?.slots?.actions;
 
       return h(
-          "div", {class: "relative"}, slot({player})
+          "div", {class: "relative text-right"}, slot({player})
       );
     },
   },
@@ -97,7 +89,7 @@ const columns: ColumnDef<Player>[] = [
 <template>
   <TableComponent
       :columns="columns"
-      :data="players"
+      :data="data"
       placeholder="Search players..."
       total-label="Total players"
   />
