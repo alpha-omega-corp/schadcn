@@ -104,12 +104,29 @@ function image(path?: string): string {
 }
 
 
+function formatDate(timestamp: number): string {
+    // If it's likely in seconds, convert to milliseconds
+    if (timestamp < 1e12) {
+        timestamp = timestamp * 1000
+    }
+
+    const d = new Date(timestamp)
+    if (isNaN(d.getTime())) return ''
+
+    const day = String(d.getDate()).padStart(2, '0')
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const year = d.getFullYear()
+
+    return `${day}/${month}/${year}`
+}
+
 export {
     apiGet,
     apiPost,
     apiPut,
     apiDelete,
     createFormData,
-    image
+    image,
+    formatDate
 }
 

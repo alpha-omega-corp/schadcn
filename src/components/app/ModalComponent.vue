@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -63,7 +64,7 @@ function getIcon() {
     <DialogTrigger as-child>
       <Button :variant="variant" class="dialog-btn">
         <component :is="getIcon()" :class="cn('size-4', action === ActionEnum.DELETE && 'text-destructive')"/>
-        <span v-if="action !== ActionEnum.DELETE">{{ action }}</span>
+        <span v-if="action === ActionEnum.CREATE">{{ action }}</span>
       </Button>
     </DialogTrigger>
 
@@ -80,7 +81,12 @@ function getIcon() {
 
       <div v-if="payload">
         <slot></slot>
-        <DialogFooter>
+        <DialogFooter class="mt-5">
+          <DialogClose as-child>
+            <Button type="button" variant="secondary">
+              Close
+            </Button>
+          </DialogClose>
           <Button variant="destructive" @click="confirm">Delete</Button>
         </DialogFooter>
       </div>

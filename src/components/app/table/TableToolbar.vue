@@ -27,17 +27,21 @@ const globalFilter = computed<string>({
 
 <template>
   <div class="flex justify-between gap-4 mb-5">
-    <Input
-        v-model="globalFilter"
-        class="border rounded px-3 py-2 text-sm"
-        placeholder="Search..."
-        type="text"
-    />
+    <div class="flex items-center gap-2">
+      <Input
+          v-model="globalFilter"
+          class="border rounded px-3 py-2 text-sm w-max"
+          placeholder="Search..."
+          type="text"
+      />
+      <slot></slot>
+    </div>
+
     <div>
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
           <Button class="ml-auto" variant="outline">
-            Columns
+            View
             <ChevronDown class="w-4 h-4 ml-2"/>
           </Button>
         </DropdownMenuTrigger>

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {apiDelete, apiGet, apiPost, apiPut, image} from "@/http.ts";
+import {apiDelete, apiGet, apiPost, apiPut, formatDate} from "@/http.ts";
 import type {AxiosResponse} from "axios";
 import {Player, PlayerSchema} from "@/models/player.ts";
 import {ActionEnum} from "@/enums/action";
@@ -7,20 +7,30 @@ import CardComponent from "@/components/app/CardComponent.vue";
 import PlayersTable from "@/views/user/PlayersTable.vue";
 import ModalComponent from "@/components/app/ModalComponent.vue";
 import PlayerForm from "@/views/user/PlayerForm.vue";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {useNotificationStore} from "@/stores/notificationStore";
 import {NotificationType} from "@/enums/notification";
 import {useI18n} from "vue-i18n";
 import {ref} from "vue";
 import {Badge} from "@/components/ui/badge";
+import AvatarComponent from "@/components/app/AvatarComponent.vue";
+import ItemComponent from "@/components/app/ItemComponent.vue";
+import {DataSelect} from "@/models/app/data";
+import TableFilter from "@/components/app/table/TableFilter.vue";
 
-const players = ref<Player[]>([])
 const notifications = useNotificationStore()
 const i18n = useI18n();
+
+const players = ref<Player[]>([])
+const positions = ref<DataSelect[]>([])
+
+apiGet<{ items: DataSelect[] }>(`/positions`).then((res: AxiosResponse<{ items: DataSelect[] }>) => {
+  positions.value = res.data.items
+})
 
 function getPlayers() {
   apiGet<{ items: Player[] }>(`/players`).then((res: AxiosResponse<{ items: Player[] }>) => {
     players.value = res.data.items;
+    console.log(players.value);
   })
 }
 
@@ -31,6 +41,7 @@ const createPlayer = (data: Player) => {
 }
 
 const updatePlayer = (data: Player) => {
+  console.log(data);
   apiPut<Player>(`/player/${data.id}`, data, true).then((res: AxiosResponse<Player>) => {
     notifications.dispatch(NotificationType.SUCCESS, {
       description: i18n.t('action.update', [`${data.firstName} ${data.lastName}`])
@@ -68,23 +79,30 @@ getPlayers()
       :title="$t('player.table.title')"
   >
     <template v-slot:content>
-      <PlayersTable :data="players">
+      <PlayersTable :data="players" :positions="positions">
+
+        <template v-slot:filters="{table}">
+          <TableFilter
+              :column="table.getColumn('positions')"
+              :options="positions"
+              title="Positions"
+          />
+        </template>
 
         <template v-slot:number="{player}">
-          <Badge>{{ player.number }}</Badge>
+          <Badge variant="secondary">{{ player.number }}</Badge>
         </template>
 
         <template v-slot:name="{player}">
           {{ player.firstName }} {{ player.lastName }}
         </template>
 
+        <template v-slot:positions="{player}">
+          <Badge variant="secondary">{{ player.positions[0].name }}</Badge>
+        </template>
+
         <template v-slot:avatar="{player}">
-          <Avatar>
-            <AvatarImage :alt="player.name" :src="image(player.avatar)"/>
-            <AvatarFallback class="rounded-lg">
-              <img :src="`https://robohash.org/${player.firstName}`" alt="">
-            </AvatarFallback>
-          </Avatar>
+          <AvatarComponent :alt="player.firstName" :path="player.avatar"/>
         </template>
 
         <template v-slot:actions="{player}">
@@ -96,17 +114,23 @@ getPlayers()
                 :title="$t('player.value')"
                 @submit="updatePlayer"
             >
-              <PlayerForm :data="player"/>
+              <PlayerForm :data="player" :positions="positions"/>
             </ModalComponent>
 
             <!-- Delete -->
             <ModalComponent
                 :action="ActionEnum.DELETE"
+                :description="$t('action.delete_confirm')"
                 :payload="player"
                 :title="$t('player.value')"
                 @submit="deletePlayer"
             >
-              {{ player.firstName }} {{ player.lastName }}
+              <ItemComponent
+                  :description="`Player created ${formatDate(player.createdAt)}`"
+                  :title="`${player.firstName} ${player.lastName}`"
+              >
+                <AvatarComponent :alt="player.firstName" :path="player.avatar" size="64"/>
+              </ItemComponent>
             </ModalComponent>
           </div>
         </template>
@@ -121,7 +145,7 @@ getPlayers()
           :title="$t('player.value')"
           @submit="createPlayer"
       >
-        <PlayerForm/>
+        <PlayerForm :positions="positions"/>
       </ModalComponent>
     </template>
   </CardComponent>

@@ -16,6 +16,7 @@ const i18n = createI18n({
     messages: {
         en: {
             action: {
+                delete_confirm: 'You are about to permanently remove the data from our servers.',
                 delete: 'Deleted {0}',
             },
             player: {

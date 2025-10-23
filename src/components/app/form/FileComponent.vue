@@ -3,6 +3,7 @@ import {ref, watch} from 'vue'
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 import {Button} from '@/components/ui/button'
 import {FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form'
+import {image} from "@/http";
 
 const props = defineProps<{
   name: string,
@@ -52,7 +53,7 @@ function onFileChange(e: Event, componentField: any) {
       <FormLabel v-if="label">{{ label }}</FormLabel>
       <div class="flex items-center gap-4">
         <Avatar class="h-16 w-16 rounded-lg overflow-hidden border-gray-300 border-1">
-          <AvatarImage v-if="previewUrl" :src="previewUrl" alt="avatar"/>
+          <AvatarImage v-if="previewUrl" :src="image(previewUrl)" alt="avatar"/>
           <AvatarFallback class="rounded-lg">AV</AvatarFallback>
         </Avatar>
 

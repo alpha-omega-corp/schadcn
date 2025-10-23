@@ -26,18 +26,24 @@ import {
   useForwardPropsEmits
 } from "reka-ui"
 import {createDecade, createYear, toDate} from "reka-ui/date"
-import {computed, ref, watch} from "vue"
+import {computed, ref, watch, nextTick} from "vue"
 
 const df = new DateFormatter("en-US", {
   dateStyle: "long",
 })
 
-const props = withDefaults(defineProps<CalendarRootProps & {
+import type { HTMLAttributes } from 'vue'
+
+type CalendarComponentProps = Omit<CalendarRootProps, 'modelValue'> & {
+  // Accept both a DateValue (CalendarDate) and a numeric timestamp
+  modelValue?: DateValue | number | undefined,
   class?: HTMLAttributes["class"],
   label: string,
   name: string,
   description?: string
-}>(), {
+}
+
+const props = withDefaults(defineProps<CalendarComponentProps>(), {
   modelValue: undefined,
   placeholder() {
     return today(getLocalTimeZone())
@@ -49,7 +55,16 @@ const props = withDefaults(defineProps<CalendarRootProps & {
 const emits = defineEmits<CalendarRootEmits>()
 
 const delegatedProps = computed(() => {
-  const {class: _, placeholder: __, ...delegated} = props
+  // Strip out props that should not be forwarded to CalendarRoot
+  const {
+    class: _,
+    placeholder: __,
+    modelValue: ___,
+    name: __n,
+    label: __l,
+    description: __d,
+    ...delegated
+  } = props
 
   return delegated
 })
@@ -74,30 +89,33 @@ function syncFormFieldFromInternal() {
   // ensure number type by using type=number and valueAsNumber
   if (typeof ts === 'number') {
     el.valueAsNumber = ts
+    // Dispatch both input and change to ensure vee-validate updates and validation runs
+    el.dispatchEvent(new Event("input", { bubbles: true }))
+    el.dispatchEvent(new Event("change", { bubbles: true }))
   } else {
+    // Clear the input value but DO NOT dispatch events so the form value stays undefined
+    // This avoids vee-validate receiving an empty string and failing number validation
     el.value = ''
   }
-  el.dispatchEvent(new Event("input", { bubbles: true }))
 }
 
 // Watch for changes to modelValue and convert to DateValue if needed
-watch(() => props.modelValue, (newValue) => {
+watch(() => props.modelValue, async (newValue) => {
   if (newValue && typeof newValue === 'object' && 'calendar' in newValue) {
     // Create a new reference to trigger reactivity
     internalDateValue.value = new CalendarDate(newValue.year, newValue.month, newValue.day)
     // Update placeholder to show the correct month/year
     placeholder.value = new CalendarDate(newValue.year, newValue.month, newValue.day)
-    // push into form field
-    syncFormFieldFromInternal()
   } else if (typeof newValue === 'number') {
     const d = new Date(newValue)
     internalDateValue.value = new CalendarDate(d.getFullYear(), d.getMonth() + 1, d.getDate())
     placeholder.value = new CalendarDate(d.getFullYear(), d.getMonth() + 1, d.getDate())
-    syncFormFieldFromInternal()
   } else {
     internalDateValue.value = undefined
-    syncFormFieldFromInternal()
   }
+  // Ensure hidden input exists and FormField is mounted before syncing
+  await nextTick()
+  syncFormFieldFromInternal()
 }, {immediate: true})
 </script>
 

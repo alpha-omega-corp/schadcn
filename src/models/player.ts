@@ -1,5 +1,6 @@
 import {toTypedSchema} from "@vee-validate/zod";
 import * as z from "zod";
+import {Position} from "@/models/position";
 
 interface Player {
     id: number
@@ -11,7 +12,7 @@ interface Player {
     isActive: boolean
     avatar?: string
     birthDate: number
-    positionId: number
+    positions: Position[]
     createdAt: number
     updatedAt: number
 }

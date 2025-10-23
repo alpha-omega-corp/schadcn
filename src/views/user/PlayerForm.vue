@@ -1,30 +1,19 @@
 <script lang="ts" setup>
 
-import InputComponent from "@/components/app/InputComponent.vue";
-import SelectComponent from "@/components/app/SelectComponent.vue";
-import CalendarComponent from "@/components/app/CalendarComponent.vue";
-import AvatarPicker from "@/components/app/AvatarPicker.vue";
+import InputComponent from "@/components/app/form/InputComponent.vue";
+import SelectComponent from "@/components/app/form/SelectComponent.vue";
+import CalendarComponent from "@/components/app/form/CalendarComponent.vue";
+import FileComponent from "@/components/app/form/FileComponent.vue";
 import {Player} from "@/models/player";
-import {ref} from "vue";
 import {DataSelect} from "@/models/app/data";
-import {apiGet, image} from "@/http";
-import type {AxiosResponse} from "axios";
-import {CalendarDate} from "@internationalized/date";
 
 const props = defineProps<{
   data?: Player
+  positions: DataSelect[]
 }>()
 
-const positions = ref<DataSelect[]>([])
-const getPositions = () => {
-  apiGet<{ items: DataSelect[] }>(`/positions`).then((res: AxiosResponse<{ items: DataSelect[] }>) => {
-    positions.value = res.data.items
-  })
-}
-
-getPositions()
 const player = props.data ?? {} as Player
-console.log(player.id);
+console.log(player.positions);
 
 
 </script>
@@ -36,8 +25,8 @@ console.log(player.id);
       type="hidden"
   />
 
-  <AvatarPicker
-      :initial-url="player.avatar ? image(player.avatar) : `https://robohash.org/${player.firstName}`"
+  <FileComponent
+      :initial-url="player.avatar"
       description="Upload a square image for best results"
       name="avatar"
   />
@@ -56,7 +45,7 @@ console.log(player.id);
 
   <CalendarComponent
       :label="$t('player.schema.birth_date')"
-      :model-value="player.birthDate ? (() => { const d = new Date(player.birthDate); return new CalendarDate(d.getFullYear(), d.getMonth() + 1, d.getDate()); })() : undefined"
+      :model-value="player.birthDate"
       name="birthDate"
   />
 
@@ -86,7 +75,7 @@ console.log(player.id);
   <SelectComponent
       :data="positions"
       :label="$t('player.schema.position')"
-      :model-value="player.positionId"
+      :model-value="player.positions ? player.positions[0].id : undefined"
       name="positionId"
   />
 </template>

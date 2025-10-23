@@ -77,7 +77,10 @@ const table = useVueTable<AnyRow>({
 
 <template>
   <div class="relative inline-block max-w-full overflow-auto">
-    <TableToolbar :table="table"/>
+    <TableToolbar :table="table">
+      <slot :table="table"></slot>
+    </TableToolbar>
+
 
     <Table>
       <TableHeader>
