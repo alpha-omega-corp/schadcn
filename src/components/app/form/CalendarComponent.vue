@@ -26,13 +26,12 @@ import {
   useForwardPropsEmits
 } from "reka-ui"
 import {createDecade, createYear, toDate} from "reka-ui/date"
-import {computed, ref, watch, nextTick} from "vue"
+import type {HTMLAttributes} from 'vue'
+import {computed, nextTick, ref, watch} from "vue"
 
 const df = new DateFormatter("en-US", {
   dateStyle: "long",
 })
-
-import type { HTMLAttributes } from 'vue'
 
 type CalendarComponentProps = Omit<CalendarRootProps, 'modelValue'> & {
   // Accept both a DateValue (CalendarDate) and a numeric timestamp
@@ -54,18 +53,9 @@ const props = withDefaults(defineProps<CalendarComponentProps>(), {
 
 const emits = defineEmits<CalendarRootEmits>()
 
+// TODO: review
 const delegatedProps = computed(() => {
-  // Strip out props that should not be forwarded to CalendarRoot
-  const {
-    class: _,
-    placeholder: __,
-    modelValue: ___,
-    name: __n,
-    label: __l,
-    description: __d,
-    ...delegated
-  } = props
-
+  const {class: placeholder, modelValue, name, label, description, ...delegated} = props
   return delegated
 })
 
@@ -90,8 +80,8 @@ function syncFormFieldFromInternal() {
   if (typeof ts === 'number') {
     el.valueAsNumber = ts
     // Dispatch both input and change to ensure vee-validate updates and validation runs
-    el.dispatchEvent(new Event("input", { bubbles: true }))
-    el.dispatchEvent(new Event("change", { bubbles: true }))
+    el.dispatchEvent(new Event("input", {bubbles: true}))
+    el.dispatchEvent(new Event("change", {bubbles: true}))
   } else {
     // Clear the input value but DO NOT dispatch events so the form value stays undefined
     // This avoids vee-validate receiving an empty string and failing number validation
@@ -120,7 +110,7 @@ watch(() => props.modelValue, async (newValue) => {
 </script>
 
 <template>
-  <FormField v-slot="{ componentField }" :name="name">
+  <FormField v-slot="{ componentField }" :name="name" :validate-on-blur="false">
     <FormItem class="flex flex-col">
       <FormLabel>{{ label }}</FormLabel>
       <Popover>
@@ -137,7 +127,9 @@ watch(() => props.modelValue, async (newValue) => {
                 }}</span>
               <CalendarIcon class="ms-auto h-4 w-4 opacity-50"/>
             </Button>
-            <input ref="hiddenInputEl" hidden type="number" v-bind="componentField" :value="internalDateValue ? toDate(internalDateValue).getTime() : ''">
+            <input ref="hiddenInputEl" :value="internalDateValue ? toDate(internalDateValue).getTime() : ''" hidden
+                   type="number"
+                   v-bind="componentField">
           </FormControl>
         </PopoverTrigger>
         <PopoverContent class="w-auto p-0">

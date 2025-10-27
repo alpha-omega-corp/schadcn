@@ -3,28 +3,37 @@ import {InjectionKey} from "vue";
 import {toast} from "@/components/ui/toast";
 import {NotificationType} from "@/enums/notification";
 
-interface Notification {
-    description: string
+interface NotificationState {
+    type: NotificationType | null,
 }
 
-export const notificationKey: InjectionKey<Store> = Symbol()
+export const notificationKey: InjectionKey<Store<NotificationState>> = Symbol()
 
-export const notificationStore: Store = createStore({
-    actions: {
-        success({commit}, props: Notification): void {
-            toast({
-                title: NotificationType.SUCCESS,
-                description: props.description,
-            });
-        },
-        error({commit}, props: Notification): void {
-            toast({
-                title: NotificationType.ERROR,
-                description: props.description,
-                variant: 'destructive',
-            });
+export const notificationStore: Store<NotificationState> = createStore({
+    state: {
+        type: null
+    },
+    mutations: {
+        update(state: NotificationState, type: NotificationType) {
+            state.type = type
         }
     },
+    actions: {
+        notify({commit}, payload: { type: NotificationType; description: string }): void {
+            commit('update', payload.type)
+
+            toast({
+                title: payload.type.toString(),
+                description: payload.description,
+            });
+        },
+    },
+    getters: {
+        type(state) {
+            return state.type
+        }
+    }
+
 })
 
 export function useNotificationStore(): Store {

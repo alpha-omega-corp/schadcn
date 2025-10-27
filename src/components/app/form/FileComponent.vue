@@ -48,7 +48,7 @@ function onFileChange(e: Event, componentField: any) {
 </script>
 
 <template>
-  <FormField v-slot="{ componentField }" :name="name">
+  <FormField v-slot="{ componentField }" :name="name" :validate-on-blur="false">
     <FormItem class="mb-8 mt-2">
       <FormLabel v-if="label">{{ label }}</FormLabel>
       <div class="flex items-center gap-4">

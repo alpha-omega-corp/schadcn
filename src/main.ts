@@ -15,6 +15,27 @@ const i18n = createI18n({
 
     messages: {
         en: {
+            app: {
+                login: 'Login',
+                login_title: 'Platform Access',
+                login_trainer: 'Login with your email and password',
+                login_player: 'Login with your access token',
+                login_token_fail: 'Unable to login. Please check with your trainer.',
+                signup: 'Sign Up',
+                signup_title: 'Create Account',
+                trainer: 'Trainer',
+                player: 'Player',
+                email: 'Email',
+                password: 'Password',
+                password_confirm: 'Confirm Password',
+                password_forgot: 'Forgot Password?',
+
+                player_token: 'Player Token',
+                no_account: 'Don\'t have an account?',
+                have_account: 'Already have an account?',
+                register: 'Sign up',
+                login_fail: 'Unable to login. Please check your credentials.',
+            },
             action: {
                 delete_confirm: 'You are about to permanently remove the data from our servers.',
                 delete: 'Deleted {0}',

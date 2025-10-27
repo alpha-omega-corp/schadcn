@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script lang="ts" setup xmlns="http://www.w3.org/1999/html">
 
 import {Input} from "@/components/ui/input";
 import {FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
@@ -15,26 +15,30 @@ defineProps<{
   type?: string,
   description?: string,
   name: string,
+  autocomplete?: boolean
 }>()
 
 </script>
 
 <template>
-  <FormField v-if="type != 'number'" v-slot="{ componentField }" :name="name">
+  <FormField v-if="type != 'number'" v-slot="{ componentField }" :name="name" :validate-on-blur="false">
     <FormItem class="flex-1">
-      <FormLabel>{{ label }}</FormLabel>
+      <div class="flex items-center">
+        <FormLabel>{{ label }}</FormLabel>
+        <slot></slot>
+      </div>
       <FormControl>
-        <Input :type="type"
-               autocomplete="off" v-bind="componentField"/>
+        <Input :autocomplete="autocomplete ?? 'on'"
+               :type="type" v-bind="componentField"/>
       </FormControl>
-      <FormDescription>
+      <FormDescription v-if="description">
         {{ description }}
       </FormDescription>
-      <FormMessage/>
+      <FormMessage class="text-xs   "/>
     </FormItem>
   </FormField>
 
-  <FormField v-else v-slot="{ componentField }" :name="name">
+  <FormField v-else v-slot="{ componentField }" :name="name" :validate-on-blur="false">
     <FormItem class="flex-1">
       <FormLabel>{{ label }}</FormLabel>
       <NumberField

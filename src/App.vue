@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {computed, defineAsyncComponent} from "vue";
 import {useRoute} from "vue-router";
-import {Toaster} from "@/components/ui/toast";
+import NotificationComponent from "@/components/app/NotificationComponent.vue";
 
 const route = useRoute();
 
@@ -22,7 +22,7 @@ const layoutComponent = computed(() => {
 
 <template>
 
-  <Toaster/>
+  <NotificationComponent/>
 
   <component :is="layoutComponent">
     <router-view/>

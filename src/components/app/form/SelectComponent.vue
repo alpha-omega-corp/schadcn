@@ -43,7 +43,7 @@ watch(() => props.modelValue, async () => {
 
 <template>
 
-  <FormField v-slot="{ componentField }" :name="name">
+  <FormField v-slot="{ componentField }" :name="name" :validate-on-blur="false">
     <FormItem class="flex-1">
       <FormLabel>{{ label }}</FormLabel>
 

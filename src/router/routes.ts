@@ -96,6 +96,12 @@ const standaloneRoutes: Route[] = [
         component: resolveComponent('LoginPage'),
         meta: {layout: 'GuestLayout'},
         service: 'guest'
+    },
+    {
+        path: '/signup',
+        component: resolveComponent('SignupPage'),
+        meta: {layout: 'GuestLayout'},
+        service: 'guest'
     }
 ]
 

@@ -7,18 +7,15 @@ import CardComponent from "@/components/app/CardComponent.vue";
 import PlayersTable from "@/views/user/PlayersTable.vue";
 import ModalComponent from "@/components/app/ModalComponent.vue";
 import PlayerForm from "@/views/user/PlayerForm.vue";
-import {useNotificationStore} from "@/stores/notificationStore";
-import {NotificationType} from "@/enums/notification";
-import {useI18n} from "vue-i18n";
 import {ref} from "vue";
 import {Badge} from "@/components/ui/badge";
 import AvatarComponent from "@/components/app/AvatarComponent.vue";
 import ItemComponent from "@/components/app/ItemComponent.vue";
 import {DataSelect} from "@/models/app/data";
 import TableFilter from "@/components/app/table/TableFilter.vue";
+import {useNotify} from "@/helpers";
 
-const notifications = useNotificationStore()
-const i18n = useI18n();
+const $notify = useNotify()
 
 const players = ref<Player[]>([])
 const positions = ref<DataSelect[]>([])
@@ -30,7 +27,6 @@ apiGet<{ items: DataSelect[] }>(`/positions`).then((res: AxiosResponse<{ items: 
 function getPlayers() {
   apiGet<{ items: Player[] }>(`/players`).then((res: AxiosResponse<{ items: Player[] }>) => {
     players.value = res.data.items;
-    console.log(players.value);
   })
 }
 
@@ -41,31 +37,20 @@ const createPlayer = (data: Player) => {
 }
 
 const updatePlayer = (data: Player) => {
-  console.log(data);
   apiPut<Player>(`/player/${data.id}`, data, true).then((res: AxiosResponse<Player>) => {
-    notifications.dispatch(NotificationType.SUCCESS, {
-      description: i18n.t('action.update', [`${data.firstName} ${data.lastName}`])
-    })
+    $notify.success('action.update', [`${data.firstName} ${data.lastName}`])
 
     getPlayers()
   }).catch((err: any) => {
-    notifications.dispatch(NotificationType.ERROR, {
-      description: err
-    })
   })
 }
 
 const deletePlayer = (data: Player) => {
   apiDelete(`player/${data.id}`).then(() => {
-    notifications.dispatch(NotificationType.SUCCESS, {
-      description: i18n.t('action.delete', [`${data.firstName} ${data.lastName}`])
-    })
+    $notify.success('action.update', [`${data.firstName} ${data.lastName}`])
 
     getPlayers()
   }).catch((err: any) => {
-    notifications.dispatch(NotificationType.ERROR, {
-      description: err
-    })
   })
 }
 

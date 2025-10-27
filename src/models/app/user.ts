@@ -1,5 +1,6 @@
 import type {Role} from "@/models/app/permission.ts";
 
+
 interface User {
     id: number;
     token: string;
@@ -8,4 +9,26 @@ interface User {
     roles: Role[];
 }
 
-export type {User}
+
+interface LoginRequest {
+    email: string
+    password: string
+}
+
+interface TokenLoginRequest {
+    token: string
+}
+
+interface RegisterRequest {
+    email: string
+    password: string
+    confirmation: string
+}
+
+export type {
+    User,
+    LoginRequest,
+    TokenLoginRequest,
+    RegisterRequest
+}
+
