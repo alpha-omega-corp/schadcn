@@ -48,7 +48,6 @@ function register(data: RegisterRequest) {
 
         <CardContent>
           <div class="grid gap-6">
-            <hr>
             <FormComponent :schema="RegisterSchema" @submit="register">
               <template #form>
                 <InputComponent

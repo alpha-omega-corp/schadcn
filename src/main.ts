@@ -16,6 +16,7 @@ const i18n = createI18n({
     messages: {
         en: {
             app: {
+                name: 'EasyIDP',
                 login: 'Login',
                 login_title: 'Platform Access',
                 login_trainer: 'Login with your email and password',

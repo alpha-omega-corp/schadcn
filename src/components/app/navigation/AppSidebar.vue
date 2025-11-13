@@ -14,9 +14,6 @@ import {
   Settings2,
   SquareTerminal,
 } from "lucide-vue-next"
-import NavGroup from '@/components/app/navigation/NavGroup.vue'
-import TeamSwitcher from '@/components/app/navigation/TeamSwitcher.vue'
-import {managementRoutes, userRoutes} from "@/router/routes.ts";
 import {useUserStore} from "@/stores/userStore";
 import NavUser from "@/components/app/navigation/NavUser.vue";
 
@@ -161,13 +158,12 @@ const data = {
 <template>
   <Sidebar v-bind="props">
     <SidebarHeader>
-      <TeamSwitcher :teams="data.teams"/>
+      <slot name="header"></slot>
     </SidebarHeader>
     <SidebarContent>
-      <NavGroup :route-groups="userRoutes" title="Team"/>
-      <NavGroup :route-groups="managementRoutes" title="Management"/>
+      <slot name="content"></slot>
     </SidebarContent>
-    <SidebarFooter>
+    <SidebarFooter v-if="userStore.getters.current">
       <NavUser :user="userStore.getters.current"/>
     </SidebarFooter>
     <SidebarRail/>

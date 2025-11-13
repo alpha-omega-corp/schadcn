@@ -1,4 +1,4 @@
-import type { Component, FunctionalComponent, HTMLAttributes, VNodeProps } from "vue"
+import type {Component, FunctionalComponent, HTMLAttributes, VNodeProps} from "vue"
 
 interface RouteGroup {
     name: string
@@ -12,7 +12,8 @@ interface Route {
     path: string
     component: Component
     service: string
+    title?: string
 }
 
-export type { RouteGroup, Route}
+export type {RouteGroup, Route}
 

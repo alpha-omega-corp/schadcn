@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {apiPost} from "@/http";
 import {AxiosResponse} from "axios";
 import {LoginRequest, TokenLoginRequest, User} from "@/models/app/user";
@@ -11,7 +10,6 @@ import * as z from "zod";
 import InputComponent from "@/components/app/form/InputComponent.vue";
 import FormComponent from "@/components/app/form/FormComponent.vue";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs'
-import SeparatorComponent from "@/components/app/SeparatorComponent.vue";
 import {useNotify} from "@/helpers";
 import ContainerComponent from "@/components/app/ContainerComponent.vue";
 import PolicyComponent from "@/components/app/PolicyComponent.vue";
@@ -49,84 +47,69 @@ function loginPlayer(data: TokenLoginRequest) {
 
 <template>
   <ContainerComponent>
-    <div class="flex flex-col gap-6">
-      <Card>
-        <CardHeader class="text-center">
-          <CardTitle class="text-xl">
-            {{ $t('app.login_title') }}
-          </CardTitle>
+    <Tabs class="w-full" default-value="trainer">
+      <TabsList class="w-full mb-5">
+        <TabsTrigger value="trainer">
+          {{ $t('app.trainer') }}
+        </TabsTrigger>
+        <TabsTrigger value="player">
+          {{ $t('app.player') }}
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="trainer">
 
-        </CardHeader>
-        <CardContent>
-          <div class="grid gap-6">
-            <Tabs class="w-full" default-value="trainer">
-              <TabsList class="w-full">
-                <TabsTrigger value="trainer">
-                  {{ $t('app.trainer') }}
-                </TabsTrigger>
-                <TabsTrigger value="player">
-                  {{ $t('app.player') }}
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="trainer">
-                <SeparatorComponent :text="$t('app.login_trainer')"/>
+        <FormComponent :schema="LoginSchema" @submit="login">
+          <template #form>
+            <InputComponent
+                :autocomplete="true"
+                :label="$t('app.email')"
+                name="email"
+                type="email"/>
+            <InputComponent
+                :label="$t('app.password')"
+                name="password"
+                type="password"
+            >
+              <a class="ml-auto text-sm underline-offset-4 hover:underline" href="#">
+                {{ $t('app.password_forgot') }}
+              </a>
+            </InputComponent>
+          </template>
 
-                <FormComponent :schema="LoginSchema" @submit="login">
-                  <template #form>
-                    <InputComponent
-                        :autocomplete="true"
-                        :label="$t('app.email')"
-                        name="email"
-                        type="email"/>
-                    <InputComponent
-                        :label="$t('app.password')"
-                        name="password"
-                        type="password"
-                    >
-                      <a class="ml-auto text-sm underline-offset-4 hover:underline" href="#">
-                        {{ $t('app.password_forgot') }}
-                      </a>
-                    </InputComponent>
-                  </template>
+          <template #submit>
+            <Button class="w-full" type="submit">
+              {{ $t('app.login') }}
+            </Button>
+          </template>
+        </FormComponent>
 
-                  <template #submit>
-                    <Button class="w-full" type="submit">
-                      {{ $t('app.login') }}
-                    </Button>
-                  </template>
-                </FormComponent>
+        <div class="text-center text-sm mt-5">
+          {{ $t('app.no_account') }}
+          <router-link class="underline underline-offset-4" to="/signup">
+            {{ $t('app.register') }}
+          </router-link>
+        </div>
+      </TabsContent>
+      <TabsContent value="player">
 
-                <div class="text-center text-sm mt-5">
-                  {{ $t('app.no_account') }}
-                  <router-link class="underline underline-offset-4" to="/signup">
-                    {{ $t('app.register') }}
-                  </router-link>
-                </div>
-              </TabsContent>
-              <TabsContent value="player">
-                <SeparatorComponent :text="$t('app.login_player')"/>
+        <FormComponent :schema="TokenLoginSchema" @submit="loginPlayer">
+          <template #form>
+            <InputComponent
+                :label="$t('app.player_token')"
+                name="token"
+            />
+          </template>
 
-                <FormComponent :schema="TokenLoginSchema" @submit="loginPlayer">
-                  <template #form>
-                    <InputComponent
-                        :label="$t('app.player_token')"
-                        name="token"
-                    />
-                  </template>
+          <template #submit>
+            <Button class="w-full" type="submit">
+              {{ $t('app.login') }}
+            </Button>
+          </template>
+        </FormComponent>
+      </TabsContent>
+    </Tabs>
 
-                  <template #submit>
-                    <Button class="w-full" type="submit">
-                      {{ $t('app.login') }}
-                    </Button>
-                  </template>
-                </FormComponent>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </CardContent>
-      </Card>
+    <PolicyComponent/>
 
-      <PolicyComponent/>
-    </div>
   </ContainerComponent>
 </template>

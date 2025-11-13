@@ -1,5 +1,5 @@
 import {type Route, type RouteGroup} from '@/models/app/router.ts';
-import {HomeIcon, UserCogIcon} from "lucide-vue-next";
+import {CircleQuestionMarkIcon, HomeIcon, ScrollTextIcon, SunriseIcon, UserCogIcon} from "lucide-vue-next";
 
 const resolveComponent = (component: string, dir?: string) => {
     return (): Promise<unknown> => dir === undefined
@@ -7,7 +7,8 @@ const resolveComponent = (component: string, dir?: string) => {
         : import(`@/views/${dir}/${component}.vue`)
 }
 
-export const guestRoutes: Route[] = [
+
+export const guestRoutes: RouteGroup[] = [
     {
         name: "Home",
         icon: HomeIcon,
@@ -15,6 +16,66 @@ export const guestRoutes: Route[] = [
             {
                 path: "/",
                 component: resolveComponent("HomePage"),
+                meta: {layout: 'GuestLayout'},
+                service: 'guest'
+            },
+
+        ]
+    },
+    {
+        name: "About",
+        icon: CircleQuestionMarkIcon,
+        routes: [
+            {
+                path: "/",
+                component: resolveComponent("HomePage"),
+                meta: {layout: 'GuestLayout'},
+                service: 'guest'
+            },
+
+        ]
+    },
+    {
+        name: "Features",
+        icon: SunriseIcon,
+        routes: [
+            {
+                name: "Team Organisation",
+                path: "/",
+                component: resolveComponent("PlansPage"),
+                meta: {layout: 'GuestLayout'},
+                service: 'guest'
+            },
+            {
+                name: "Player Management",
+                path: "/",
+                component: resolveComponent("PlansPage"),
+                meta: {layout: 'GuestLayout'},
+                service: 'guest'
+            },
+            {
+                name: "Training Milestones",
+                path: "/",
+                component: resolveComponent("PlansPage"),
+                meta: {layout: 'GuestLayout'},
+                service: 'guest'
+            },
+            {
+                name: "Game Scheduling",
+                path: "/",
+                component: resolveComponent("PlansPage"),
+                meta: {layout: 'GuestLayout'},
+                service: 'guest'
+            },
+        ]
+    },
+    {
+        name: "Plans",
+        icon: ScrollTextIcon,
+        routes: [
+            {
+                path: "/",
+                component: resolveComponent("FeaturesPage"),
                 meta: {layout: 'GuestLayout'},
                 service: 'guest'
             },
@@ -93,6 +154,7 @@ export const managementRoutes: Route[] = [
 const standaloneRoutes: Route[] = [
     {
         path: '/login',
+        title: 'Login',
         component: resolveComponent('LoginPage'),
         meta: {layout: 'GuestLayout'},
         service: 'guest'

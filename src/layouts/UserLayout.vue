@@ -10,11 +10,21 @@ import {
 } from "@/components/ui/breadcrumb"
 import {Separator} from "@/components/ui/separator"
 import {SidebarInset, SidebarProvider, SidebarTrigger,} from "@/components/ui/sidebar"
+import NavGroup from "@/components/app/navigation/NavGroup.vue";
+import TeamSwitcher from "@/components/app/navigation/TeamSwitcher.vue";
 </script>
 
 <template>
   <SidebarProvider>
-    <AppSidebar/>
+    <AppSidebar>
+      <template #header>
+        <TeamSwitcher :teams="data.teams"/>
+      </template>
+      <template #content>
+        <NavGroup :route-groups="userRoutes" title="Team"/>
+        <NavGroup :route-groups="managementRoutes" title="Management"/>
+      </template>
+    </AppSidebar>
     <SidebarInset>
       <header
           class="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
