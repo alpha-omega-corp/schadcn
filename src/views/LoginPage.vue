@@ -48,6 +48,11 @@ function loginPlayer(data: TokenLoginRequest) {
 <template>
   <ContainerComponent>
     <Tabs class="w-full" default-value="trainer">
+      <--
+      <template v-for="value in values">
+
+      </template>
+      -->
       <TabsList class="w-full mb-5">
         <TabsTrigger value="trainer">
           {{ $t('app.trainer') }}

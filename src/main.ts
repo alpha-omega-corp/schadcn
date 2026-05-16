@@ -16,6 +16,9 @@ const i18n = createI18n({
     messages: {
         en: {
             app: {
+                idp_title: 'What is an IDP?',
+                idp_description: 'The complete football management platform to organize training, track performance, and achieve victory.',
+
                 name: 'EasyIDP',
                 login: 'Login',
                 login_title: 'Platform Access',

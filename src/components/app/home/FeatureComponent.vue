@@ -13,6 +13,7 @@ defineProps<{
     <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
       <component :is="icon" :class="$attrs.class" class="size-6"/>
     </div>
+
     <div class="flex-1">
       <h3 class="text-lg font-semibold text-gray-900 mb-2">
         {{ title }}
@@ -21,6 +22,7 @@ defineProps<{
         {{ description }}
       </p>
     </div>
+
   </div>
 </template>
 
